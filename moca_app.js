@@ -15,6 +15,23 @@ class MoCATest {
             delayedRecall: 5,
             orientation: 6
         };
+        this.stepFiles = {
+            2: 'moca_step2_trail.html',
+            3: 'moca_step3_bed.html',
+            4: 'moca_step4_clock.html',
+            5: 'moca_step5_naming.html',
+            6: 'moca_step6_memory.html',
+            7: 'moca_step7_attention.html',
+            8: 'moca_step8_vigilance.html',
+            9: 'moca_step9_serial7s.html',
+            10: 'moca_step10_language.html',
+            11: 'moca_step11_fluency.html',
+            12: 'moca_step12_abstraction.html',
+            13: 'moca_step13_delayed_recall.html',
+            14: 'moca_step14_orientation.html',
+            15: 'moca_step15_final_score.html'
+        };
+        this.loadedSteps = {};
         this.initializeTest();
     }
 
@@ -31,7 +48,7 @@ class MoCATest {
         document.querySelector('.progress-info').textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
     }
 
-    showCurrentStep() {
+    async showCurrentStep() {
         // Hide all steps
         document.querySelectorAll('.step').forEach(step => {
             step.classList.remove('active');
@@ -41,6 +58,30 @@ class MoCATest {
         const currentStepElement = document.querySelector(`.step-${this.currentStep}`);
         if (currentStepElement) {
             currentStepElement.classList.add('active');
+        }
+
+        // Dynamically load step content if needed
+        if (this.stepFiles[this.currentStep] && !this.loadedSteps[this.currentStep]) {
+            const container = currentStepElement.querySelector('div');
+            if (container) {
+                try {
+                    const response = await fetch(this.stepFiles[this.currentStep]);
+                    if (response.ok) {
+                        const html = await response.text();
+                        // Extract the main content from the loaded HTML (skip <html>, <head>, etc.)
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+                        // Try to find the main content area
+                        let mainContent = tempDiv.querySelector('.content') || tempDiv;
+                        container.innerHTML = mainContent.innerHTML;
+                        this.loadedSteps[this.currentStep] = true;
+                    } else {
+                        container.innerHTML = '<div style="color:red">Failed to load step content.</div>';
+                    }
+                } catch (e) {
+                    container.innerHTML = '<div style="color:red">Error loading step content.</div>';
+                }
+            }
         }
     }
 
@@ -91,7 +132,8 @@ class MoCATest {
         for (const [test, score] of Object.entries(this.scores)) {
             totalScore += score;
         }
-        document.getElementById('total-score').textContent = totalScore;
+        const scoreElem = document.getElementById('total-score');
+        if (scoreElem) scoreElem.textContent = totalScore;
     }
 
     calculateEducationAdjustment(education) {
@@ -118,7 +160,8 @@ class MoCATest {
             patientInfo: {
                 education: document.getElementById('education-years').value,
                 age: document.getElementById('age').value,
-                gender: document.getElementById('gender').value
+                gender: document.getElementById('gender').value,
+                name: document.getElementById('patient-name').value
             }
         };
 
