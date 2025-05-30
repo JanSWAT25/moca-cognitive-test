@@ -193,7 +193,9 @@ class MoCATest {
 
     initializeAdvancedTrailTest() {
         // Advanced JS logic from moca_step2_trail.html
-        let canvas, ctx;
+        let canvas = document.getElementById('trailCanvas');
+        if (!canvas) return;
+        let ctx = canvas.getContext('2d');
         let isDrawing = false;
         let currentTargetIndex = 0;
         let pathPoints = [];
@@ -202,6 +204,34 @@ class MoCATest {
         let timerInterval = null;
         let errors = 0;
         let isTestComplete = false;
+
+        // Remove any previous event listeners by cloning the canvas
+        const newCanvas = canvas.cloneNode(true);
+        canvas.parentNode.replaceChild(newCanvas, canvas);
+        canvas = newCanvas;
+        ctx = canvas.getContext('2d');
+
+        // Reset dashboard and feedback
+        document.getElementById('currentTarget').textContent = 'Start at 1';
+        document.getElementById('currentTarget').className = 'status-value status-progress';
+        document.getElementById('progressCount').textContent = '0/10';
+        document.getElementById('errorCount').textContent = '0';
+        document.getElementById('elapsedTime').textContent = '00:00';
+        document.getElementById('feedbackArea').style.display = 'none';
+        document.getElementById('validateBtn').disabled = true;
+
+        // Remove old hint path
+        const svg = document.getElementById('hintOverlay');
+        if (svg) {
+            while (svg.lastChild && svg.lastChild.nodeName === 'path') {
+                svg.removeChild(svg.lastChild);
+            }
+        }
+
+        // Remove completed/current classes from points
+        document.querySelectorAll('.trail-point').forEach(point => {
+            point.classList.remove('completed', 'current');
+        });
 
         const trailSequence = [
             {value: '1', type: 'number', id: 'point-1'},
@@ -217,9 +247,6 @@ class MoCATest {
         ];
 
         function initializeTrailTest() {
-            canvas = document.getElementById('trailCanvas');
-            if (!canvas) return;
-            ctx = canvas.getContext('2d');
             setupDrawingEvents();
             updateCurrentTarget();
             generateHintPath();
