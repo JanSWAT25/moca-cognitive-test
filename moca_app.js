@@ -310,7 +310,7 @@ class MoCATest {
         function stopDrawing() {
             if (isDrawing) {
                 isDrawing = false;
-                ctx.beginPath();
+                ctx.closePath(); // Ensure path is closed
                 if (pathPoints.length > 0) {
                     drawnPath.push([...pathPoints]);
                     pathPoints = [];
