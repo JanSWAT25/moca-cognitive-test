@@ -72,6 +72,14 @@ class MoCATest {
                         const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
                         if (bodyMatch && bodyMatch[1]) {
                             container.innerHTML = bodyMatch[1];
+                            // Extract and execute <script> tags
+                            const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+                            let match;
+                            while ((match = scriptRegex.exec(bodyMatch[1])) !== null) {
+                                const scriptTag = document.createElement('script');
+                                scriptTag.text = match[1];
+                                document.body.appendChild(scriptTag);
+                            }
                         } else {
                             container.innerHTML = '<div style="color:red">Step content not found.</div>';
                         }
