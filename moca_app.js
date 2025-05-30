@@ -270,13 +270,14 @@ class MoCATest {
         });
 
         function drawLineBetweenPoints(from, to) {
+            // Get the center of each circle relative to the canvas
+            const canvasRect = canvas.getBoundingClientRect();
             const fromRect = from.getBoundingClientRect();
             const toRect = to.getBoundingClientRect();
-            const canvasRect = canvas.getBoundingClientRect();
-            const fromX = fromRect.left - canvasRect.left + fromRect.width / 2;
-            const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
-            const toX = toRect.left - canvasRect.left + toRect.width / 2;
-            const toY = toRect.top - canvasRect.top + toRect.height / 2;
+            const fromX = fromRect.left + fromRect.width / 2 - canvasRect.left;
+            const fromY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+            const toX = toRect.left + toRect.width / 2 - canvasRect.left;
+            const toY = toRect.top + toRect.height / 2 - canvasRect.top;
             ctx.beginPath();
             ctx.moveTo(fromX, fromY);
             ctx.lineTo(toX, toY);
