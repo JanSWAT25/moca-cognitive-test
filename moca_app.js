@@ -295,6 +295,7 @@ class MoCATest {
 
         function draw(e) {
             if (!isDrawing || isTestComplete) return;
+            console.log('draw event', e);
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
