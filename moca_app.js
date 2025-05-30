@@ -192,24 +192,15 @@ class MoCATest {
     }
 
     initializeAdvancedTrailTest() {
-        // Advanced JS logic from moca_step2_trail.html
+        // Click-based Trail Making Test logic
+        let currentTargetIndex = 0;
+        let errorCount = 0;
+        let isTestComplete = false;
+        let lastPoint = null;
+        let lines = [];
         let canvas = document.getElementById('trailCanvas');
         if (!canvas) return;
         let ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let currentTargetIndex = 0;
-        let pathPoints = [];
-        let drawnPath = [];
-        let testStartTime = null;
-        let timerInterval = null;
-        let errors = 0;
-        let isTestComplete = false;
-
-        // Remove any previous event listeners by cloning the canvas
-        const newCanvas = canvas.cloneNode(true);
-        canvas.parentNode.replaceChild(newCanvas, canvas);
-        canvas = newCanvas;
-        ctx = canvas.getContext('2d');
 
         // Reset dashboard and feedback
         document.getElementById('currentTarget').textContent = 'Start at 1';
@@ -220,18 +211,15 @@ class MoCATest {
         document.getElementById('feedbackArea').style.display = 'none';
         document.getElementById('validateBtn').disabled = true;
 
-        // Remove old hint path
-        const svg = document.getElementById('hintOverlay');
-        if (svg) {
-            while (svg.lastChild && svg.lastChild.nodeName === 'path') {
-                svg.removeChild(svg.lastChild);
-            }
-        }
-
         // Remove completed/current classes from points
         document.querySelectorAll('.trail-point').forEach(point => {
             point.classList.remove('completed', 'current');
         });
+
+        // Remove old lines
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        lines = [];
+        lastPoint = null;
 
         const trailSequence = [
             {value: '1', type: 'number', id: 'point-1'},
@@ -246,117 +234,48 @@ class MoCATest {
             {value: 'E', type: 'letter', id: 'point-E'}
         ];
 
-        function initializeTrailTest() {
-            setupDrawingEvents();
-            updateCurrentTarget();
-            generateHintPath();
-            startTimer();
-        }
-
-        function setupDrawingEvents() {
-            canvas.addEventListener('mousedown', function(e) {
-                console.log('mousedown on canvas', e);
-                startDrawing(e);
-            });
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-            // Touch events for mobile
-            canvas.addEventListener('touchstart', handleTouch);
-            canvas.addEventListener('touchmove', handleTouch);
-            canvas.addEventListener('touchend', stopDrawing);
-        }
-
-        function startDrawing(e) {
-            if (isTestComplete) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            if (currentTargetIndex === 0) {
-                const startPoint = getPointPosition(trailSequence[0].id);
-                const distance = Math.sqrt(Math.pow(x - startPoint.x, 2) + Math.pow(y - startPoint.y, 2));
-                if (distance > 30) {
-                    showFeedback('Please start drawing from point 1', 'error');
-                    incrementErrors();
-                    return;
+        // Attach click listeners to each point
+        document.querySelectorAll('.trail-point').forEach((point, idx) => {
+            point.onclick = function() {
+                if (isTestComplete) return;
+                if (idx === currentTargetIndex) {
+                    // Correct click
+                    point.classList.add('completed');
+                    if (lastPoint) {
+                        drawLineBetweenPoints(lastPoint, point);
+                    }
+                    lastPoint = point;
+                    currentTargetIndex++;
+                    document.getElementById('progressCount').textContent = `${currentTargetIndex}/10`;
+                    updateCurrentTarget();
+                    if (currentTargetIndex === trailSequence.length) {
+                        isTestComplete = true;
+                        showFeedback('Sequence complete! Click Validate to finish.', 'success');
+                        document.getElementById('validateBtn').disabled = false;
+                    }
+                } else {
+                    // Incorrect click
+                    errorCount++;
+                    document.getElementById('errorCount').textContent = errorCount;
+                    showFeedback('Incorrect circle. Please follow the sequence.', 'error');
                 }
-                if (!testStartTime) {
-                    testStartTime = Date.now();
-                }
-            }
-            isDrawing = true;
-            pathPoints = [{x, y}];
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#3498db';
-        }
-
-        function draw(e) {
-            if (!isDrawing || isTestComplete) return;
-            console.log('draw event', e);
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            pathPoints.push({x, y});
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            checkTargetReached(x, y);
-        }
-
-        function stopDrawing() {
-            if (isDrawing) {
-                isDrawing = false;
-                ctx.closePath(); // Ensure path is closed
-                if (pathPoints.length > 0) {
-                    drawnPath.push([...pathPoints]);
-                    pathPoints = [];
-                }
-                document.getElementById('validateBtn').disabled = false;
-            }
-        }
-
-        function handleTouch(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
-                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
-        }
-
-        function checkTargetReached(x, y) {
-            if (currentTargetIndex >= trailSequence.length) return;
-            const targetPoint = getPointPosition(trailSequence[currentTargetIndex].id);
-            const distance = Math.sqrt(Math.pow(x - targetPoint.x, 2) + Math.pow(y - targetPoint.y, 2));
-            if (distance < 25) {
-                markPointCompleted(trailSequence[currentTargetIndex].id);
-                currentTargetIndex++;
-                updateCurrentTarget();
-                updateProgress();
-                if (currentTargetIndex >= trailSequence.length) {
-                    completeTest();
-                }
-            }
-        }
-
-        function getPointPosition(pointId) {
-            const element = document.getElementById(pointId);
-            const rect = element.getBoundingClientRect();
-            const canvasRect = canvas.getBoundingClientRect();
-            return {
-                x: rect.left - canvasRect.left + rect.width / 2,
-                y: rect.top - canvasRect.top + rect.height / 2
             };
-        }
+        });
 
-        function markPointCompleted(pointId) {
-            const point = document.getElementById(pointId);
-            point.classList.remove('current');
-            point.classList.add('completed');
+        function drawLineBetweenPoints(from, to) {
+            const fromRect = from.getBoundingClientRect();
+            const toRect = to.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            const fromX = fromRect.left - canvasRect.left + fromRect.width / 2;
+            const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
+            const toX = toRect.left - canvasRect.left + toRect.width / 2;
+            const toY = toRect.top - canvasRect.top + toRect.height / 2;
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 4;
+            ctx.stroke();
         }
 
         function updateCurrentTarget() {
@@ -366,102 +285,11 @@ class MoCATest {
             if (currentTargetIndex < trailSequence.length) {
                 const targetElement = document.getElementById(trailSequence[currentTargetIndex].id);
                 targetElement.classList.add('current');
-                document.getElementById('currentTarget').textContent = 
-                    `Go to: ${trailSequence[currentTargetIndex].value}`;
+                document.getElementById('currentTarget').textContent = `Go to: ${trailSequence[currentTargetIndex].value}`;
             } else {
                 document.getElementById('currentTarget').textContent = 'Complete!';
                 document.getElementById('currentTarget').className = 'status-value status-success';
             }
-        }
-
-        function updateProgress() {
-            document.getElementById('progressCount').textContent = `${currentTargetIndex}/10`;
-        }
-
-        function incrementErrors() {
-            errors++;
-            document.getElementById('errorCount').textContent = errors;
-        }
-
-        function startTimer() {
-            const startTime = Date.now();
-            timerInterval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                document.getElementById('elapsedTime').textContent = timeString;
-            }, 1000);
-        }
-
-        function generateHintPath() {
-            const svg = document.getElementById('hintOverlay');
-            if (!svg) return;
-            let pathData = '';
-            for (let i = 0; i < trailSequence.length - 1; i++) {
-                const start = getPointPosition(trailSequence[i].id);
-                const end = getPointPosition(trailSequence[i + 1].id);
-                if (i === 0) {
-                    pathData += `M ${start.x} ${start.y} `;
-                }
-                pathData += `L ${end.x} ${end.y} `;
-            }
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', pathData);
-            path.setAttribute('stroke', '#2ecc71');
-            path.setAttribute('stroke-width', '3');
-            path.setAttribute('stroke-dasharray', '8,4');
-            path.setAttribute('fill', 'none');
-            path.setAttribute('marker-end', 'url(#arrowhead)');
-            path.setAttribute('opacity', '0.8');
-            svg.appendChild(path);
-        }
-
-        function toggleHint() {
-            const hintOverlay = document.getElementById('hintOverlay');
-            const hintBtn = document.getElementById('hintBtn');
-            if (hintOverlay.classList.contains('visible')) {
-                hintOverlay.classList.remove('visible');
-                hintBtn.innerHTML = '💡 Show Hint';
-            } else {
-                hintOverlay.classList.add('visible');
-                hintBtn.innerHTML = '👁️ Hide Hint';
-                setTimeout(() => {
-                    hintOverlay.classList.remove('visible');
-                    hintBtn.innerHTML = '💡 Show Hint';
-                }, 3000);
-            }
-        }
-
-        function clearTrail() {
-            if (!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawnPath = [];
-            pathPoints = [];
-            document.getElementById('validateBtn').disabled = true;
-        }
-
-        function resetTest() {
-            clearTrail();
-            currentTargetIndex = 0;
-            errors = 0;
-            isTestComplete = false;
-            updateCurrentTarget();
-            updateProgress();
-            document.getElementById('errorCount').textContent = '0';
-            document.getElementById('feedbackArea').style.display = 'none';
-            document.getElementById('validateBtn').disabled = true;
-        }
-
-        function validatePath() {
-            // For demo: just show success
-            showFeedback('Path validated! (Demo only)', 'success');
-            isTestComplete = true;
-            document.getElementById('validateBtn').disabled = true;
-        }
-
-        function completeTest() {
-            showFeedback('Test complete! Please validate your path.', 'info');
         }
 
         function showFeedback(message, type) {
@@ -487,13 +315,10 @@ class MoCATest {
         };
 
         // Attach global functions for controls
-        window.clearTrail = clearTrail;
-        window.toggleHint = toggleHint;
-        window.resetTest = resetTest;
-        window.validatePath = validatePath;
-
-        // Initialize when Step 2 is shown
-        setTimeout(initializeTrailTest, 100);
+        window.clearTrail = function() { ctx.clearRect(0, 0, canvas.width, canvas.height); lastPoint = null; lines = []; document.querySelectorAll('.trail-point').forEach(p => p.classList.remove('completed', 'current')); currentTargetIndex = 0; errorCount = 0; isTestComplete = false; document.getElementById('progressCount').textContent = '0/10'; document.getElementById('errorCount').textContent = '0'; document.getElementById('feedbackArea').style.display = 'none'; document.getElementById('validateBtn').disabled = true; updateCurrentTarget(); };
+        window.toggleHint = function() { showFeedback('Follow the sequence: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E', 'info'); };
+        window.resetTest = window.clearTrail;
+        window.validatePath = function() { showFeedback('Path validated! (Demo only)', 'success'); };
     }
 }
 
