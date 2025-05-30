@@ -44,15 +44,46 @@ body {
     overflow: hidden;
 }
 
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .header h1 {
     font-size: 2.5em;
     margin-bottom: 10px;
     font-weight: 700;
+    position: relative;
+    z-index: 1;
 }
 
 .header p {
     font-size: 1.2em;
     opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+.version-badge, .step-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    backdrop-filter: blur(10px);
 }
 
 .progress-section {
@@ -219,29 +250,133 @@ input:focus, select:focus, textarea:focus {
     to { opacity: 1; transform: translateX(0); }
 }
 
+/* --- Additional unique styles from step files (drawing, animal cards, etc.) --- */
+.trail-container, .drawing-container, .clock-container, .animals-grid, .memory-words-display, .test-section, .letter-display-area {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 30px 0;
+    border: 2px solid #e9ecef;
+    position: relative;
+}
+
+.drawing-area, .drawing-section .drawing-area, .reference-clock, .bed-reference {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin: 0 auto;
+    position: relative;
+}
+
+.btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #2c3e50;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.animals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.animal-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 3px solid #dee2e6;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.animal-card.answered {
+    border-color: #2ecc71;
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+}
+
+.animal-card.correct {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    animation: correctPulse 2s ease-in-out;
+}
+
+.animal-card.incorrect {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    animation: incorrectShake 0.5s ease-in-out;
+}
+
+@keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes incorrectShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
         margin: 10px;
         border-radius: 15px;
     }
-
     .header h1 {
         font-size: 2em;
     }
-
     .content {
         padding: 20px;
     }
-
     .step-title {
         font-size: 1.8em;
     }
-
     .button-group {
         flex-direction: column;
     }
-
     .nav-button {
         width: 100%;
     }

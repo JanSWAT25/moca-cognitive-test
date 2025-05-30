@@ -70,10 +70,10 @@ class MoCATest {
                         const html = await response.text();
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = html;
-                        // Only inject the innerHTML of the .content div
-                        const contentDiv = tempDiv.querySelector('.content');
-                        if (contentDiv) {
-                            container.innerHTML = contentDiv.innerHTML;
+                        // Only inject the innerHTML of the <body> tag
+                        const bodyDiv = tempDiv.querySelector('body');
+                        if (bodyDiv) {
+                            container.innerHTML = bodyDiv.innerHTML;
                         } else {
                             container.innerHTML = '<div style="color:red">Step content not found.</div>';
                         }
