@@ -59,26 +59,87 @@
             <!-- Step 2: Trail Making -->
             <div class="step step-2">
                 <div class="step-title">
-                    <div class="step-icon">2</div>
+                    <div class="step-icon">🔀</div>
                     Trail Making Test
                 </div>
                 <div class="instructions">
-                    Connect the numbers and letters in ascending order, alternating between numbers and letters.
+                    <strong>Instructions:</strong> Please draw a line going from a number to a letter in ascending order. Begin here [point to 1] and draw a line from 1 then to A then to 2 and so on. End here [point to E]. Do not lift your pen while drawing.
+                </div>
+                <div class="sequence-display">
+                    Target Sequence: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E
                 </div>
                 <div class="trail-container">
                     <div class="trail-header">
-                        <div class="trail-title">Alternating Trail Making</div>
+                        <div class="trail-title">Trail Making Template</div>
                         <div class="legend">
-                            <div class="legend-item legend-numbers">Numbers</div>
-                            <div class="legend-item legend-letters">Letters</div>
+                            <div class="legend-item legend-numbers">● Numbers</div>
+                            <div class="legend-item legend-letters">● Letters</div>
                         </div>
                     </div>
-                    <div class="trail-template" id="trailCanvas"></div>
-                    <div class="controls">
-                        <button class="btn btn-secondary" type="button" onclick="clearTrail()">Clear Drawing</button>
-                        <button class="btn btn-warning" type="button" onclick="toggleHint()">Show Hint</button>
-                        <button class="btn btn-success" type="button" onclick="validatePath()">Validate Path</button>
+                    <div class="trail-template" id="trailTemplate">
+                        <!-- Trail points positioned according to MoCA layout -->
+                        <div class="trail-point number" id="point-1" data-value="1" data-index="0" style="top: 50px; left: 80px;">1</div>
+                        <div class="trail-point letter" id="point-A" data-value="A" data-index="1" style="top: 80px; left: 250px;">A</div>
+                        <div class="trail-point number" id="point-2" data-value="2" data-index="2" style="top: 150px; left: 180px;">2</div>
+                        <div class="trail-point letter" id="point-B" data-value="B" data-index="3" style="top: 220px; left: 350px;">B</div>
+                        <div class="trail-point number" id="point-3" data-value="3" data-index="4" style="top: 280px; left: 200px;">3</div>
+                        <div class="trail-point letter" id="point-C" data-value="C" data-index="5" style="top: 180px; left: 450px;">C</div>
+                        <div class="trail-point number" id="point-4" data-value="4" data-index="6" style="top: 100px; left: 400px;">4</div>
+                        <div class="trail-point letter" id="point-D" data-value="D" data-index="7" style="top: 320px; left: 120px;">D</div>
+                        <div class="trail-point number" id="point-5" data-value="5" data-index="8" style="top: 350px; left: 300px;">5</div>
+                        <div class="trail-point letter" id="point-E" data-value="E" data-index="9" style="top: 250px; left: 500px;">E</div>
+                        <!-- Drawing canvas -->
+                        <canvas id="trailCanvas" class="drawing-canvas" width="600" height="400"></canvas>
+                        <!-- Hint overlay -->
+                        <svg class="hint-overlay" id="hintOverlay" width="600" height="400">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#2ecc71" />
+                                </marker>
+                            </defs>
+                            <!-- Hint path will be drawn here -->
+                        </svg>
                     </div>
+                </div>
+                <div class="status-dashboard">
+                    <div class="status-card">
+                        <div class="status-label">Current Target</div>
+                        <div class="status-value status-progress" id="currentTarget">Start at 1</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Progress</div>
+                        <div class="status-value status-success" id="progressCount">0/10</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Errors</div>
+                        <div class="status-value status-error" id="errorCount">0</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">Time Elapsed</div>
+                        <div class="status-value status-warning" id="elapsedTime">00:00</div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="clearTrail()">🗑️ Clear Drawing</button>
+                    <button class="btn btn-warning" onclick="toggleHint()" id="hintBtn">💡 Show Hint</button>
+                    <button class="btn btn-secondary" onclick="resetTest()">🔄 Reset Test</button>
+                    <button class="btn btn-success" onclick="validatePath()" id="validateBtn" disabled>✓ Validate Path</button>
+                </div>
+                <div class="feedback-area" id="feedbackArea">
+                    <!-- Feedback messages will appear here -->
+                </div>
+                <div class="scoring-criteria">
+                    <h3 style="margin-bottom: 15px; color: #856404;">Scoring Criteria (1 point total):</h3>
+                    <ul class="criteria-list">
+                        <li>Successfully draw the pattern: 1-A-2-B-3-C-4-D-5-E</li>
+                        <li>Lines must not cross each other</li>
+                        <li>Must be completed without lifting the pen</li>
+                        <li>Any error not immediately self-corrected earns a score of 0</li>
+                        <li>Do not connect the end (E) to the beginning (1)</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-style: italic; color: #856404;">
+                        <strong>Note:</strong> The task assesses executive function, visual attention, and task switching abilities.
+                    </p>
                 </div>
             </div>
 
