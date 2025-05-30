@@ -62,18 +62,21 @@ class MoCATest {
 
         // Dynamically load step content if needed
         if (this.stepFiles[this.currentStep] && !this.loadedSteps[this.currentStep]) {
-            const container = currentStepElement.querySelector('div');
+            const container = currentStepElement.querySelector('.step-content');
             if (container) {
                 try {
                     const response = await fetch(this.stepFiles[this.currentStep]);
                     if (response.ok) {
                         const html = await response.text();
-                        // Extract the main content from the loaded HTML (skip <html>, <head>, etc.)
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = html;
-                        // Try to find the main content area
-                        let mainContent = tempDiv.querySelector('.content') || tempDiv;
-                        container.innerHTML = mainContent.innerHTML;
+                        // Only inject the innerHTML of the .content div
+                        const contentDiv = tempDiv.querySelector('.content');
+                        if (contentDiv) {
+                            container.innerHTML = contentDiv.innerHTML;
+                        } else {
+                            container.innerHTML = '<div style="color:red">Step content not found.</div>';
+                        }
                         this.loadedSteps[this.currentStep] = true;
                     } else {
                         container.innerHTML = '<div style="color:red">Failed to load step content.</div>';
@@ -82,6 +85,12 @@ class MoCATest {
                     container.innerHTML = '<div style="color:red">Error loading step content.</div>';
                 }
             }
+        }
+
+        // Show/hide Previous button
+        const prevBtn = document.querySelector('.nav-button[data-action="prev"]');
+        if (prevBtn) {
+            prevBtn.style.display = this.currentStep === 1 ? 'none' : '';
         }
     }
 
