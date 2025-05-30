@@ -256,9 +256,9 @@ class MoCATest {
                 if (idx !== userPath.length - 1) {
                     errorCount++;
                     document.getElementById('errorCount').textContent = errorCount;
-                    showFeedback('Incorrect order. Keep going!', 'error');
+                    // No feedback during the test
                 } else {
-                    showFeedback('Correct! Continue the sequence.', 'success');
+                    // No feedback during the test
                 }
                 // Enable validation after 10 clicks
                 if (userPath.length === 10) {
@@ -280,8 +280,8 @@ class MoCATest {
             ctx.beginPath();
             ctx.moveTo(fromX, fromY);
             ctx.lineTo(toX, toY);
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#2986cc';
+            ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.stroke();
         }

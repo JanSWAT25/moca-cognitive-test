@@ -477,25 +477,19 @@ input:focus, select:focus, textarea:focus {
 }
 
 .trail-point.completed {
-    background: linear-gradient(135deg, #d4edda, #b2f0c0);
-    color: #27ae60;
-    border-color: #27ae60;
-    position: relative;
-}
-
-.trail-point.completed:after {
-    content: '✓';
-    position: absolute;
-    right: 8px;
-    bottom: 6px;
-    font-size: 1.1em;
-    color: #27ae60;
-    opacity: 0.8;
+    background: white;
+    opacity: 0.7;
+    border-style: solid;
 }
 
 .drawing-canvas {
-    z-index: 5;
+    z-index: 1;
     pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .status-dashboard {
@@ -783,7 +777,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 4px 12px rgba(0,0,0,0.10);
     cursor: pointer;
     transition: all 0.2s;
-    z-index: 10;
+    z-index: 2;
 }
 .trail-point.number {
     border-color: #3498db;
@@ -807,11 +801,13 @@ input:focus, select:focus, textarea:focus {
     border-style: solid;
 }
 .drawing-canvas {
-    z-index: 5;
+    z-index: 1;
     pointer-events: none;
     position: absolute;
     left: 0;
     top: 0;
+    width: 100%;
+    height: 100%;
 }
 .dashboard-row {
     display: flex;
