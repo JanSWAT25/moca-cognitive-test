@@ -19,10 +19,10 @@ class MoCATest {
     }
 
     initializeTest() {
-        // Initialize the test state
         this.updateProgress();
         this.showCurrentStep();
         this.attachEventListeners();
+        this.initializeStepContent();
     }
 
     updateProgress() {
@@ -31,7 +31,7 @@ class MoCATest {
         document.querySelector('.progress-info').textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
     }
 
-    async showCurrentStep() {
+    showCurrentStep() {
         // Hide all steps
         document.querySelectorAll('.step').forEach(step => {
             step.classList.remove('active');
@@ -48,6 +48,53 @@ class MoCATest {
         if (prevBtn) {
             prevBtn.style.display = this.currentStep === 1 ? 'none' : '';
         }
+    }
+
+    initializeStepContent() {
+        // Initialize step-specific content
+        if (this.currentStep === 2) {
+            this.initializeTrailMaking();
+        } else if (this.currentStep === 3) {
+            this.initializeMemoryTest();
+        }
+        // Add more step initializations as needed
+    }
+
+    initializeTrailMaking() {
+        const trailCanvas = document.getElementById('trailCanvas');
+        if (!trailCanvas) return;
+
+        // Create trail points
+        const points = [
+            { type: 'number', value: '1', x: 50, y: 50 },
+            { type: 'letter', value: 'A', x: 150, y: 50 },
+            { type: 'number', value: '2', x: 250, y: 50 },
+            { type: 'letter', value: 'B', x: 350, y: 50 },
+            { type: 'number', value: '3', x: 450, y: 50 },
+            { type: 'letter', value: 'C', x: 550, y: 50 },
+            { type: 'number', value: '4', x: 650, y: 50 },
+            { type: 'letter', value: 'D', x: 750, y: 50 },
+            { type: 'number', value: '5', x: 850, y: 50 },
+            { type: 'letter', value: 'E', x: 950, y: 50 }
+        ];
+
+        points.forEach(point => {
+            const pointElement = document.createElement('div');
+            pointElement.className = `trail-point ${point.type}`;
+            pointElement.textContent = point.value;
+            pointElement.style.left = `${point.x}px`;
+            pointElement.style.top = `${point.y}px`;
+            trailCanvas.appendChild(pointElement);
+        });
+    }
+
+    initializeMemoryTest() {
+        const wordList = document.querySelector('.word-list');
+        if (!wordList) return;
+
+        // Add any memory test specific initialization here
+        const words = ['LEG', 'COTTON', 'SCHOOL', 'TOMATO', 'WHITE'];
+        wordList.innerHTML = words.map(word => `<div class="word-item">${word}</div>`).join('');
     }
 
     attachEventListeners() {
@@ -76,6 +123,7 @@ class MoCATest {
             this.currentStep++;
             this.updateProgress();
             this.showCurrentStep();
+            this.initializeStepContent();
         }
     }
 
@@ -84,6 +132,7 @@ class MoCATest {
             this.currentStep--;
             this.updateProgress();
             this.showCurrentStep();
+            this.initializeStepContent();
         }
     }
 

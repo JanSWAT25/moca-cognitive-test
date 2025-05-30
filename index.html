@@ -65,8 +65,22 @@
                 <div class="instructions">
                     Connect the numbers and letters in ascending order, alternating between numbers and letters.
                 </div>
-                <div class="step-content trail-container">
-                    <!-- Trail making test content will be loaded here -->
+                <div class="trail-container">
+                    <div class="trail-header">
+                        <div class="trail-title">Alternating Trail Making</div>
+                        <div class="legend">
+                            <div class="legend-item legend-numbers">Numbers</div>
+                            <div class="legend-item legend-letters">Letters</div>
+                        </div>
+                    </div>
+                    <div class="trail-template" id="trailCanvas">
+                        <!-- Trail points will be added dynamically -->
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-secondary" onclick="clearTrail()">Clear Drawing</button>
+                        <button class="btn btn-warning" onclick="toggleHint()">Show Hint</button>
+                        <button class="btn btn-success" onclick="validatePath()">Validate Path</button>
+                    </div>
                 </div>
             </div>
 
@@ -79,12 +93,18 @@
                 <div class="instructions">
                     I will read you a list of words. Please repeat them back to me in any order.
                 </div>
-                <div class="step-content memory-container">
-                    <!-- Memory test content will be loaded here -->
+                <div class="memory-container">
+                    <div class="word-list">
+                        <div class="word-item">LEG</div>
+                        <div class="word-item">COTTON</div>
+                        <div class="word-item">SCHOOL</div>
+                        <div class="word-item">TOMATO</div>
+                        <div class="word-item">WHITE</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Additional steps will be loaded dynamically -->
+            <!-- Additional steps will be added here -->
 
             <!-- Navigation Buttons -->
             <div class="button-group">
