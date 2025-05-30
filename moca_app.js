@@ -192,12 +192,13 @@ class MoCATest {
     }
 
     initializeAdvancedTrailTest() {
-        // Click-based Trail Making Test logic
+        // Click-based Trail Making Test logic with scoring and validation
         let currentTargetIndex = 0;
         let errorCount = 0;
         let isTestComplete = false;
         let lastPoint = null;
         let lines = [];
+        let userPath = [];
         let canvas = document.getElementById('trailCanvas');
         if (!canvas) return;
         let ctx = canvas.getContext('2d');
@@ -220,6 +221,10 @@ class MoCATest {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         lines = [];
         lastPoint = null;
+        userPath = [];
+        isTestComplete = false;
+        currentTargetIndex = 0;
+        errorCount = 0;
 
         const trailSequence = [
             {value: '1', type: 'number', id: 'point-1'},
@@ -237,27 +242,29 @@ class MoCATest {
         // Attach click listeners to each point
         document.querySelectorAll('.trail-point').forEach((point, idx) => {
             point.onclick = function() {
-                if (isTestComplete) return;
-                if (idx === currentTargetIndex) {
-                    // Correct click
-                    point.classList.add('completed');
-                    if (lastPoint) {
-                        drawLineBetweenPoints(lastPoint, point);
-                    }
-                    lastPoint = point;
-                    currentTargetIndex++;
-                    document.getElementById('progressCount').textContent = `${currentTargetIndex}/10`;
-                    updateCurrentTarget();
-                    if (currentTargetIndex === trailSequence.length) {
-                        isTestComplete = true;
-                        showFeedback('Sequence complete! Click Validate to finish.', 'success');
-                        document.getElementById('validateBtn').disabled = false;
-                    }
-                } else {
-                    // Incorrect click
+                if (isTestComplete || userPath.length >= 10) return;
+                // Draw line from lastPoint to this point
+                if (lastPoint) {
+                    drawLineBetweenPoints(lastPoint, point);
+                }
+                lastPoint = point;
+                userPath.push(idx);
+                point.classList.add('completed');
+                document.getElementById('progressCount').textContent = `${userPath.length}/10`;
+                updateCurrentTarget();
+                // Check correctness for scoring
+                if (idx !== userPath.length - 1) {
                     errorCount++;
                     document.getElementById('errorCount').textContent = errorCount;
-                    showFeedback('Incorrect circle. Please follow the sequence.', 'error');
+                    showFeedback('Incorrect order. Keep going!', 'error');
+                } else {
+                    showFeedback('Correct! Continue the sequence.', 'success');
+                }
+                // Enable validation after 10 clicks
+                if (userPath.length === 10) {
+                    isTestComplete = true;
+                    document.getElementById('validateBtn').disabled = false;
+                    showFeedback('Sequence complete! Click Validate to see your score.', 'info');
                 }
             };
         });
@@ -275,6 +282,7 @@ class MoCATest {
             ctx.lineTo(toX, toY);
             ctx.strokeStyle = '#3498db';
             ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
             ctx.stroke();
         }
 
@@ -282,10 +290,10 @@ class MoCATest {
             document.querySelectorAll('.trail-point').forEach(point => {
                 point.classList.remove('current');
             });
-            if (currentTargetIndex < trailSequence.length) {
-                const targetElement = document.getElementById(trailSequence[currentTargetIndex].id);
+            if (userPath.length < trailSequence.length) {
+                const targetElement = document.getElementById(trailSequence[userPath.length].id);
                 targetElement.classList.add('current');
-                document.getElementById('currentTarget').textContent = `Go to: ${trailSequence[currentTargetIndex].value}`;
+                document.getElementById('currentTarget').textContent = `Go to: ${trailSequence[userPath.length].value}`;
             } else {
                 document.getElementById('currentTarget').textContent = 'Complete!';
                 document.getElementById('currentTarget').className = 'status-value status-success';
@@ -315,10 +323,41 @@ class MoCATest {
         };
 
         // Attach global functions for controls
-        window.clearTrail = function() { ctx.clearRect(0, 0, canvas.width, canvas.height); lastPoint = null; lines = []; document.querySelectorAll('.trail-point').forEach(p => p.classList.remove('completed', 'current')); currentTargetIndex = 0; errorCount = 0; isTestComplete = false; document.getElementById('progressCount').textContent = '0/10'; document.getElementById('errorCount').textContent = '0'; document.getElementById('feedbackArea').style.display = 'none'; document.getElementById('validateBtn').disabled = true; updateCurrentTarget(); };
-        window.toggleHint = function() { showFeedback('Follow the sequence: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E', 'info'); };
+        window.clearTrail = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            lastPoint = null;
+            lines = [];
+            userPath = [];
+            document.querySelectorAll('.trail-point').forEach(p => p.classList.remove('completed', 'current'));
+            currentTargetIndex = 0;
+            errorCount = 0;
+            isTestComplete = false;
+            document.getElementById('progressCount').textContent = '0/10';
+            document.getElementById('errorCount').textContent = '0';
+            document.getElementById('feedbackArea').style.display = 'none';
+            document.getElementById('validateBtn').disabled = true;
+            updateCurrentTarget();
+        };
+        window.showHint = function() { showFeedback('Follow the sequence: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E', 'info'); };
         window.resetTest = window.clearTrail;
-        window.validatePath = function() { showFeedback('Path validated! (Demo only)', 'success'); };
+        window.validatePath = function() {
+            // Score: count how many in userPath are in the correct order
+            let correct = 0;
+            for (let i = 0; i < trailSequence.length; i++) {
+                if (userPath[i] === i) correct++;
+            }
+            let scoreMsg = `<div>Score: <strong>${correct}/10</strong></div>`;
+            let errorMsg = `<div>Errors: <strong>${errorCount}</strong></div>`;
+            let feedback = '';
+            if (correct === 10) {
+                feedback = '<div style="color:#27ae60;font-weight:600;">Perfect! You completed the sequence without mistakes.</div>';
+            } else if (correct >= 7) {
+                feedback = '<div style="color:#f39c12;font-weight:600;">Good job! Minor mistakes, but mostly correct.</div>';
+            } else {
+                feedback = '<div style="color:#e74c3c;font-weight:600;">Needs improvement. Try to follow the sequence more closely.</div>';
+            }
+            showFeedback(`${scoreMsg}${errorMsg}${feedback}`, 'info');
+        };
     }
 }
 
