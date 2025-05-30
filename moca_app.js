@@ -302,8 +302,6 @@ class MoCATest {
             pathPoints.push({x, y});
             ctx.lineTo(x, y);
             ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
             checkTargetReached(x, y);
         }
 
