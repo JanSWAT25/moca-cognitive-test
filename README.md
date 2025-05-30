@@ -28,7 +28,7 @@ A web-based implementation of the Montreal Cognitive Assessment (MoCA) test, ver
 
 ## Deployment
 
-This application is deployed using GitHub Pages. Visit the live version at: [Your GitHub Pages URL]
+This application is deployed using GitHub Pages. Visit the live version at: [https://janswat25.github.io/moca-cognitive-test/](https://janswat25.github.io/moca-cognitive-test/)
 
 ## License
 
