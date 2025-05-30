@@ -68,12 +68,10 @@ class MoCATest {
                     const response = await fetch(this.stepFiles[this.currentStep]);
                     if (response.ok) {
                         const html = await response.text();
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        // Only inject the innerHTML of the <body> tag
-                        const bodyDiv = tempDiv.querySelector('body');
-                        if (bodyDiv) {
-                            container.innerHTML = bodyDiv.innerHTML;
+                        // Extract content between <body> and </body> using regex
+                        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                        if (bodyMatch && bodyMatch[1]) {
+                            container.innerHTML = bodyMatch[1];
                         } else {
                             container.innerHTML = '<div style="color:red">Step content not found.</div>';
                         }
