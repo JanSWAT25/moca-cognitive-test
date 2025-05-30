@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 3 - Bed Drawing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .drawing-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .reference-section {
+            text-align: center;
+        }
+
+        .reference-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .bed-reference {
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            border: 3px solid #3498db;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .drawing-section {
+            text-align: center;
+        }
+
+        .drawing-area {
+            border: 3px dashed #bdc3c7;
+            border-radius: 15px;
+            background: #fff;
+            width: 350px;
+            height: 250px;
+            margin: 0 auto;
+            position: relative;
+            cursor: crosshair;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .drawing-area:hover {
+            border-color: #3498db;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .drawing-area canvas {
+            border-radius: 12px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .drawing-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7f8c8d;
+            font-size: 1.1em;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .drawing-tools {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .criteria-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .criteria-list li {
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .criteria-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .status-card {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status-drawing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-lines {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-score {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .feedback-area {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .analysis-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .analysis-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .analysis-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+        }
+
+        .analysis-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .analysis-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .drawing-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .bed-reference, .drawing-area {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .drawing-tools {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 3 of 15</div>
+            <h1>🛏️ Visuoconstructional Skills</h1>
+            <p>Bed Drawing Assessment</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">🛏️</div>
+                Copy the Bed Drawing
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> Copy this drawing as accurately as you can. The drawing must be three-dimensional with all lines drawn and meeting properly. Pay attention to the perspective and proportions of the bed.
+            </div>
+
+            <div class="drawing-container">
+                <div class="reference-section">
+                    <div class="reference-title">Reference Bed</div>
+                    <div class="bed-reference">
+                        <canvas id="referenceBed" width="294" height="194"></canvas>
+                    </div>
+                    <p style="margin-top: 15px; color: #6c757d; font-size: 0.9em;">
+                        Study this 3D bed drawing carefully before copying
+                    </p>
+                </div>
+
+                <div class="drawing-section">
+                    <div class="reference-title">Your Drawing</div>
+                    <div class="drawing-area">
+                        <canvas id="bedCanvas" width="344" height="244"></canvas>
+                        <div class="drawing-prompt" id="drawingPrompt">
+                            Click and drag to draw<br>
+                            <small>Copy the bed as accurately as possible</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawing-tools">
+                <button class="btn btn-secondary" onclick="clearDrawing()">
+                    🗑️ Clear Drawing
+                </button>
+                <button class="btn btn-secondary" onclick="undoLastStroke()">
+                    ↶ Undo Last
+                </button>
+                <button class="btn btn-primary" onclick="togglePenSize()">
+                    ✏️ <span id="penSizeText">Normal Pen</span>
+                </button>
+                <button class="btn btn-success" onclick="analyzeDrawing()" id="analyzeBtn">
+                    🔍 Analyze Drawing
+                </button>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card status-drawing">
+                    <div><strong>Drawing Status:</strong></div>
+                    <div id="drawingStatus">Ready to Start</div>
+                </div>
+                <div class="status-card status-lines">
+                    <div><strong>Strokes Made:</strong></div>
+                    <div id="strokeCount">0</div>
+                </div>
+                <div class="status-card status-score">
+                    <div><strong>Estimated Score:</strong></div>
+                    <div id="estimatedScore">Not yet assessed</div>
+                </div>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback content will be inserted here -->
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 15px; color: #856404;">Scoring Criteria (1 point total):</h3>
+                <ul class="criteria-list">
+                    <li>Drawing must be three-dimensional</li>
+                    <li>All lines are drawn</li>
+                    <li>All lines meet with little or no space</li>
+                    <li>No extra lines added</li>
+                    <li>Lines are relatively parallel and their length is similar</li>
+                    <li>The bed's orientation in space must be preserved</li>
+                </ul>
+                <p style="margin-top: 15px; font-style: italic;">
+                    <strong>Note:</strong> A point is not assigned if any of the above criteria is not met.
+                </p>
+            </div>
+
+            <div class="analysis-panel" id="analysisPanel" style="display: none;">
+                <div class="analysis-title">Drawing Analysis</div>
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <div class="analysis-value" id="dimensionalScore">-</div>
+                        <div class="analysis-label">3D Quality</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-value" id="completenessScore">-</div>
+                        <div class="analysis-label">Completeness</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-value" id="accuracyScore">-</div>
+                        <div class="analysis-label">Accuracy</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-value" id="proportionScore">-</div>
+                        <div class="analysis-label">Proportions</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="goToNextStep()" id="nextBtn">
+                    Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let bedCanvas, bedCtx;
+        let referenceCanvas, referenceCtx;
+        let isDrawing = false;
+        let strokes = [];
+        let currentStroke = [];
+        let penSize = 2;
+        let drawingStarted = false;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBedDrawing();
+            drawReferenceBed();
+        });
+
+        function initializeBedDrawing() {
+            // Initialize main drawing canvas
+            bedCanvas = document.getElementById('bedCanvas');
+            bedCtx = bedCanvas.getContext('2d');
+            
+            // Initialize reference canvas
+            referenceCanvas = document.getElementById('referenceBed');
+            referenceCtx = referenceCanvas.getContext('2d');
+            
+            setupDrawingEvents();
+        }
+
+        function setupDrawingEvents() {
+            // Mouse events
+            bedCanvas.addEventListener('mousedown', startDrawing);
+            bedCanvas.addEventListener('mousemove', draw);
+            bedCanvas.addEventListener('mouseup', stopDrawing);
+            bedCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            bedCanvas.addEventListener('touchstart', handleTouch);
+            bedCanvas.addEventListener('touchmove', handleTouch);
+            bedCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function drawReferenceBed() {
+            referenceCtx.clearRect(0, 0, referenceCanvas.width, referenceCanvas.height);
+            referenceCtx.strokeStyle = '#2c3e50';
+            referenceCtx.lineWidth = 3;
+            referenceCtx.lineCap = 'round';
+            referenceCtx.lineJoin = 'round';
+
+            // Draw bed frame (front view)
+            referenceCtx.beginPath();
+            // Headboard
+            referenceCtx.moveTo(50, 60);
+            referenceCtx.lineTo(50, 140);
+            referenceCtx.lineTo(200, 140);
+            referenceCtx.lineTo(200, 60);
+            
+            // Bed base (front)
+            referenceCtx.moveTo(40, 140);
+            referenceCtx.lineTo(210, 140);
+            referenceCtx.lineTo(210, 160);
+            referenceCtx.lineTo(40, 160);
+            referenceCtx.lineTo(40, 140);
+            
+            // 3D perspective lines
+            referenceCtx.moveTo(200, 60);
+            referenceCtx.lineTo(230, 40);
+            referenceCtx.moveTo(200, 140);
+            referenceCtx.lineTo(230, 120);
+            referenceCtx.moveTo(210, 140);
+            referenceCtx.lineTo(240, 120);
+            referenceCtx.moveTo(210, 160);
+            referenceCtx.lineTo(240, 140);
+            
+            // Back edges
+            referenceCtx.moveTo(230, 40);
+            referenceCtx.lineTo(230, 120);
+            referenceCtx.moveTo(230, 120);
+            referenceCtx.lineTo(240, 120);
+            referenceCtx.moveTo(240, 120);
+            referenceCtx.lineTo(240, 140);
+            
+            referenceCtx.stroke();
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            drawingStarted = true;
+            
+            const rect = bedCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            currentStroke = [{x, y}];
+            
+            bedCtx.beginPath();
+            bedCtx.moveTo(x, y);
+            
+            updateDrawingStatus('Drawing in progress...');
+            hideDrawingPrompt();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = bedCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            currentStroke.push({x, y});
+            
+            bedCtx.lineWidth = penSize;
+            bedCtx.lineCap = 'round';
+            bedCtx.strokeStyle = '#2c3e50';
+            bedCtx.lineTo(x, y);
+            bedCtx.stroke();
+            bedCtx.beginPath();
+            bedCtx.moveTo(x, y);
+        }
+
+        function stopDrawing() {
+            if (isDrawing && currentStroke.length > 0) {
+                strokes.push([...currentStroke]);
+                currentStroke = [];
+                updateStrokeCount();
+            }
+            isDrawing = false;
+            bedCtx.beginPath();
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            bedCanvas.dispatchEvent(mouseEvent);
+        }
+
+        function clearDrawing() {
+            bedCtx.clearRect(0, 0, bedCanvas.width, bedCanvas.height);
+            strokes = [];
+            currentStroke = [];
+            drawingStarted = false;
+            
+            updateStrokeCount();
+            updateDrawingStatus('Ready to Start');
+            showDrawingPrompt();
+            hideAnalysis();
+            hideFeedback();
+            updateEstimatedScore('Not yet assessed');
+        }
+
+        function undoLastStroke() {
+            if (strokes.length > 0) {
+                strokes.pop();
+                redrawCanvas();
+                updateStrokeCount();
+                
+                if (strokes.length === 0) {
+                    updateDrawingStatus('Ready to Start');
+                    showDrawingPrompt();
+                    drawingStarted = false;
+                }
+            }
+        }
+
+        function redrawCanvas() {
+            bedCtx.clearRect(0, 0, bedCanvas.width, bedCanvas.height);
+            
+            bedCtx.strokeStyle = '#2c3e50';
+            bedCtx.lineWidth = penSize;
+            bedCtx.lineCap = 'round';
+            
+            strokes.forEach(stroke => {
+                if (stroke.length > 0) {
+                    bedCtx.beginPath();
+                    bedCtx.moveTo(stroke[0].x, stroke[0].y);
+                    
+                    for (let i = 1; i < stroke.length; i++) {
+                        bedCtx.lineTo(stroke[i].x, stroke[i].y);
+                    }
+                    bedCtx.stroke();
+                }
+            });
+        }
+
+        function togglePenSize() {
+            penSize = penSize === 2 ? 4 : 2;
+            document.getElementById('penSizeText').textContent = penSize === 2 ? 'Normal Pen' : 'Thick Pen';
+        }
+
+        function analyzeDrawing() {
+            if (!drawingStarted) {
+                showFeedback('Please draw something before analyzing.', 'warning');
+                return;
+            }
+
+            // Simulate analysis (in real implementation, this would use computer vision)
+            const analysis = performDrawingAnalysis();
+            displayAnalysis(analysis);
+            
+            const score = calculateFinalScore(analysis);
+            updateEstimatedScore(score > 0 ? '1/1 point' : '0/1 point');
+            
+            if (score > 0) {
+                showFeedback('✓ Excellent! Your drawing meets all the criteria for a 3D bed representation.', 'success');
+            } else {
+                showFeedback('⚠️ Your drawing needs improvement. Please ensure it\'s three-dimensional with all required elements.', 'error');
+            }
+        }
+
+        function performDrawingAnalysis() {
+            // Simplified analysis based on drawing characteristics
+            const totalStrokes = strokes.length;
+            const totalPoints = strokes.reduce((acc, stroke) => acc + stroke.length, 0);
+            
+            return {
+                dimensional: Math.min(100, (totalStrokes / 8) * 100), // Expect ~8 major strokes
+                completeness: Math.min(100, (totalPoints / 200) * 100), // Expect ~200 points
+                accuracy: Math.random() * 40 + 60, // Simulated accuracy
+                proportion: Math.random() * 30 + 70 // Simulated proportion
+            };
+        }
+
+        function displayAnalysis(analysis) {
+            document.getElementById('dimensionalScore').textContent = Math.round(analysis.dimensional) + '%';
+            document.getElementById('completenessScore').textContent = Math.round(analysis.completeness) + '%';
+            document.getElementById('accuracyScore').textContent = Math.round(analysis.accuracy) + '%';
+            document.getElementById('proportionScore').textContent = Math.round(analysis.proportion) + '%';
+            
+            document.getElementById('analysisPanel').style.display = 'block';
+            document.getElementById('analysisPanel').classList.add('bounce-in');
+        }
+
+        function calculateFinalScore(analysis) {
+            const avgScore = (analysis.dimensional + analysis.completeness + analysis.accuracy + analysis.proportion) / 4;
+            return avgScore >= 70 ? 1 : 0;
+        }
+
+        function updateStrokeCount() {
+            document.getElementById('strokeCount').textContent = strokes.length;
+        }
+
+        function updateDrawingStatus(status) {
+            document.getElementById('drawingStatus').textContent = status;
+        }
+
+        function updateEstimatedScore(score) {
+            document.getElementById('estimatedScore').textContent = score;
+        }
+
+        function hideDrawingPrompt() {
+            document.getElementById('drawingPrompt').style.display = 'none';
+        }
+
+        function showDrawingPrompt() {
+            document.getElementById('drawingPrompt').style.display = 'block';
+        }
+
+        function showFeedback(message, type) {
+            const feedbackArea = document.getElementById('feedbackArea');
+            feedbackArea.innerHTML = `<strong>${message}</strong>`;
+            feedbackArea.className = `feedback-area feedback-${type}`;
+            feedbackArea.style.display = 'block';
+            
+            if (type === 'error') {
+                feedbackArea.classList.add('shake');
+                setTimeout(() => feedbackArea.classList.remove('shake'), 500);
+            } else {
+                feedbackArea.classList.add('bounce-in');
+                setTimeout(() => feedbackArea.classList.remove('bounce-in'), 800);
+            }
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedbackArea').style.display = 'none';
+        }
+
+        function hideAnalysis() {
+            document.getElementById('analysisPanel').style.display = 'none';
+        }
+
+        function goToPreviousStep() {
+            // Navigation logic would go here
+            alert('Navigate to previous step');
+        }
+
+        function goToNextStep() {
+            if (!drawingStarted) {
+                showFeedback('Please complete the bed drawing before proceeding.', 'warning');
+                return;
+            }
+            
+            // Navigation logic would go here
+            alert('Navigate to next step');
+        }
+    </script>
+</body>
+</html>

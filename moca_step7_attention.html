@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 7 - Attention (Digit Span) Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .test-section {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .test-section.active {
+            border-color: #3498db;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .test-section.active::before {
+            left: 100%;
+        }
+
+        .section-title {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .forward-section .section-icon {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .backward-section .section-icon {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .digit-display {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 3.5em;
+            font-weight: 900;
+            letter-spacing: 20px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .backward-section .digit-display {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .digit-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: digitShimmer 3s infinite;
+        }
+
+        @keyframes digitShimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .digit-sequence {
+            position: relative;
+            z-index: 1;
+            animation: digitAppear 0.8s ease-out;
+        }
+
+        @keyframes digitAppear {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .sequence-hint {
+            font-size: 0.4em;
+            opacity: 0.8;
+            margin-top: 10px;
+            letter-spacing: normal;
+        }
+
+        .input-container {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .input-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .digit-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border: 3px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 2em;
+            text-align: center;
+            letter-spacing: 10px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .digit-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .digit-input.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .digit-input.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .input-feedback {
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            min-height: 25px;
+        }
+
+        .feedback-correct {
+            color: #28a745;
+            animation: successPulse 1s ease-in-out;
+        }
+
+        .feedback-incorrect {
+            color: #dc3545;
+            animation: errorShake 0.5s ease-in-out;
+        }
+
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .scoring-dashboard {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .dashboard-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .score-item:hover::before {
+            left: 100%;
+        }
+
+        .score-label {
+            font-size: 0.95em;
+            color: #6c757d;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-excellent { color: #28a745; }
+        .score-good { color: #17a2b8; }
+        .score-warning { color: #ffc107; }
+        .score-error { color: #dc3545; }
+
+        .progress-indicator {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .test-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e9ecef;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: white;
+        }
+
+        .status-complete {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .feedback-area {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .feedback-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .criteria-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .criteria-list li {
+            margin: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .criteria-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .step-title {
+                font-size: 1.8em;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .digit-display {
+                font-size: 2.5em;
+                letter-spacing: 10px;
+                padding: 30px 15px;
+            }
+            
+            .digit-input {
+                font-size: 1.5em;
+                letter-spacing: 5px;
+                padding: 15px;
+            }
+            
+            .score-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+            
+            .test-status {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 7 of 15</div>
+            <h1>⚡ Attention Assessment</h1>
+            <p>Digit Span Test - Working Memory & Attention</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">⚡</div>
+                Digit Span Test
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> I am going to say some numbers. When I am through, repeat them to me exactly as I said them. Listen carefully and try to remember the sequence. First, we'll do forward digit span, then backward digit span.
+            </div>
+
+            <div class="progress-indicator" id="progressIndicator">
+                Ready to Begin Digit Span Assessment
+            </div>
+
+            <div class="test-status">
+                <div class="status-item">
+                    <div class="status-icon status-pending" id="forwardStatus">1</div>
+                    <span>Forward Digit Span</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon status-pending" id="backwardStatus">2</div>
+                    <span>Backward Digit Span</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon status-pending" id="totalStatus">✓</div>
+                    <span>Complete Assessment</span>
+                </div>
+            </div>
+
+            <!-- Forward Digit Span -->
+            <div class="test-section forward-section" id="forwardSection">
+                <div class="section-title">
+                    <div class="section-icon">→</div>
+                    Forward Digit Span
+                </div>
+                
+                <p style="color: #6c757d; margin-bottom: 20px;">
+                    <strong>Task:</strong> Repeat the numbers in the same order as presented
+                </p>
+
+                <div class="digit-display">
+                    <div class="digit-sequence" id="forwardSequence">2 4 8 1 5</div>
+                    <div class="sequence-hint">Read at 1 digit per second</div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-label">Enter the numbers in the same order:</div>
+                    <input type="text" 
+                           class="digit-input" 
+                           id="forwardInput" 
+                           placeholder="2 4 8 1 5"
+                           maxlength="11"
+                           onchange="checkForwardAnswer(this.value)">
+                    <div class="input-feedback" id="forwardFeedback"></div>
+                </div>
+            </div>
+
+            <!-- Backward Digit Span -->
+            <div class="test-section backward-section" id="backwardSection" style="display: none;">
+                <div class="section-title">
+                    <div class="section-icon">←</div>
+                    Backward Digit Span
+                </div>
+                
+                <p style="color: #6c757d; margin-bottom: 20px;">
+                    <strong>Task:</strong> Repeat the numbers in reverse order (backward)
+                </p>
+
+                <div class="digit-display">
+                    <div class="digit-sequence" id="backwardSequence">4 2 7</div>
+                    <div class="sequence-hint">Remember: Say these BACKWARD</div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-label">Enter the numbers in REVERSE order:</div>
+                    <input type="text" 
+                           class="digit-input" 
+                           id="backwardInput" 
+                           placeholder="7 2 4"
+                           maxlength="7"
+                           onchange="checkBackwardAnswer(this.value)">
+                    <div class="input-feedback" id="backwardFeedback"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-warning" onclick="startForwardTest()" id="startForwardBtn">
+                    ▶️ Start Forward Test
+                </button>
+                <button class="btn btn-primary" onclick="startBackwardTest()" id="startBackwardBtn" style="display: none;">
+                    ▶️ Start Backward Test
+                </button>
+                <button class="btn btn-success" onclick="completeDigitSpan()" id="completeBtn" style="display: none;">
+                    ✓ Complete Assessment
+                </button>
+                <button class="btn btn-secondary" onclick="repeatSequence()" id="repeatBtn" style="display: none;">
+                    🔄 Repeat Sequence
+                </button>
+                <button class="btn btn-secondary" onclick="resetDigitSpan()" id="resetBtn">
+                    🔄 Reset Test
+                </button>
+            </div>
+
+            <div class="scoring-dashboard">
+                <div class="dashboard-title">Digit Span Performance</div>
+                <div class="score-grid">
+                    <div class="score-item">
+                        <div class="score-label">Forward Score</div>
+                        <div class="score-value" id="forwardScore">-/1</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Backward Score</div>
+                        <div class="score-value" id="backwardScore">-/1</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Total Score</div>
+                        <div class="score-value score-warning" id="totalDigitScore">0/2</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Working Memory</div>
+                        <div class="score-value" id="workingMemoryStatus">Pending</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback messages will appear here -->
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 20px; color: #856404;">Scoring Criteria (2 points total):</h3>
+                <div class="criteria-list">
+                    <li><strong>Forward Digit Span (1 point):</strong> Correctly repeat "2 4 8 1 5" in the same order</li>
+                    <li><strong>Backward Digit Span (1 point):</strong> Correctly repeat "4 2 7" in reverse order as "7 2 4"</li>
+                    <li>Each sequence must be repeated exactly as specified</li>
+                    <li>Numbers should be separated by spaces</li>
+                    <li>This test measures working memory and attention span</li>
+                </div>
+                <p style="margin-top: 20px; font-style: italic; color: #856404;">
+                    <strong>Note:</strong> The examiner reads each sequence at a rate of one digit per second. If the subject repeats the backward sequence in forward order, do not ask them to repeat it backward at this point.
+                </p>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="goToNextStep()" id="nextBtn">
+                    Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTest = 'none';
+        let forwardCompleted = false;
+        let backwardCompleted = false;
+        let forwardCorrect = false;
+        let backwardCorrect = false;
+        
+        const forwardSequence = '2 4 8 1 5';
+        const backwardSequence = '4 2 7';
+        const backwardAnswer = '7 2 4';
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDigitSpan();
+        });
+
+        function initializeDigitSpan() {
+            setupInputListeners();
+            updateScoreDisplay();
+        }
+
+        function setupInputListeners() {
+            const forwardInput = document.getElementById('forwardInput');
+            const backwardInput = document.getElementById('backwardInput');
+
+            // Forward input listeners
+            forwardInput.addEventListener('input', function(e) {
+                // Auto-format input with spaces
+                let value = e.target.value.replace(/[^\d\s]/g, '').replace(/\s+/g, ' ').trim();
+                if (value.length > 0 && !value.includes(' ')) {
+                    value = value.split('').join(' ');
+                }
+                e.target.value = value;
+            });
+
+            forwardInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkForwardAnswer(this.value);
+                }
+            });
+
+            // Backward input listeners
+            backwardInput.addEventListener('input', function(e) {
+                // Auto-format input with spaces
+                let value = e.target.value.replace(/[^\d\s]/g, '').replace(/\s+/g, ' ').trim();
+                if (value.length > 0 && !value.includes(' ')) {
+                    value = value.split('').join(' ');
+                }
+                e.target.value = value;
+            });
+
+            backwardInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkBackwardAnswer(this.value);
+                }
+            });
+        }
+
+        function startForwardTest() {
+            currentTest = 'forward';
+            document.getElementById('forwardSection').classList.add('active');
+            document.getElementById('forwardSection').style.display = 'block';
+            document.getElementById('startForwardBtn').style.display = 'none';
+            document.getElementById('repeatBtn').style.display = 'inline-flex';
+            document.getElementById('progressIndicator').textContent = 'Forward Digit Span: Listen and repeat in the same order';
+            
+            // Focus input
+            setTimeout(() => {
+                document.getElementById('forwardInput').focus();
+            }, 500);
+            
+            showFeedback('Listen carefully to the sequence: 2 4 8 1 5. Repeat it in the same order.', 'info');
+        }
+
+        function startBackwardTest() {
+            currentTest = 'backward';
+            document.getElementById('forwardSection').classList.remove('active');
+            document.getElementById('backwardSection').style.display = 'block';
+            document.getElementById('backwardSection').classList.add('active');
+            document.getElementById('startBackwardBtn').style.display = 'none';
+            document.getElementById('completeBtn').style.display = 'inline-flex';
+            document.getElementById('progressIndicator').textContent = 'Backward Digit Span: Listen and repeat in REVERSE order';
+            
+            // Focus input
+            setTimeout(() => {
+                document.getElementById('backwardInput').focus();
+            }, 500);
+            
+            showFeedback('Listen carefully to the sequence: 4 2 7. Repeat it BACKWARD as: 7 2 4.', 'info');
+        }
+
+        function checkForwardAnswer(value) {
+            const trimmedValue = value.trim();
+            forwardCorrect = trimmedValue === forwardSequence;
+            forwardCompleted = true;
+            
+            const input = document.getElementById('forwardInput');
+            const feedback = document.getElementById('forwardFeedback');
+            
+            if (forwardCorrect) {
+                input.classList.add('correct');
+                input.classList.remove('incorrect');
+                feedback.textContent = '✓ Correct! Perfect forward digit span.';
+                feedback.className = 'input-feedback feedback-correct';
+                
+                document.getElementById('forwardStatus').className = 'status-icon status-complete';
+                document.getElementById('forwardStatus').textContent = '✓';
+                
+                setTimeout(() => {
+                    document.getElementById('startBackwardBtn').style.display = 'inline-flex';
+                    document.getElementById('repeatBtn').style.display = 'none';
+                }, 1500

@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 11 - Verbal Fluency Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .letter-display {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 5em;
+            font-weight: 900;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.1em;
+        }
+
+        .letter-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: letterShimmer 4s infinite;
+        }
+
+        @keyframes letterShimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .letter-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .letter-instruction {
+            font-size: 0.3em;
+            margin-top: 15px;
+            opacity: 0.9;
+            letter-spacing: normal;
+        }
+
+        .timer-display {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-number {
+            font-size: 4em;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .timer-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .timer-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            transition: width 1s linear;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .input-area {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+
+        .input-area.active {
+            border-color: #f39c12;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.2);
+        }
+
+        .input-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .word-input {
+            width: 100%;
+            padding: 20px;
+            border: 3px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 1.3em;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .word-input:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .word-input:disabled {
+            background: #f8f9fa;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .word-count-display {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .count-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .count-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .count-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .count-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .count-excellent { color: #28a745; }
+        .count-good { color: #17a2b8; }
+        .count-warning { color: #ffc107; }
+        .count-error { color: #dc3545; }
+
+        .word-list {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .word-list-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .word-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .word-tag {
+            background: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+            animation: wordAppear 0.3s ease-out;
+        }
+
+        .word-tag.invalid {
+            background: #dc3545;
+            text-decoration: line-through;
+        }
+
+        .word-tag.duplicate {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        @keyframes wordAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-indicator {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .feedback-area {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .feedback-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .rules-section {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .examples-section {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .timer-warning {
+            animation: timerWarning 1s infinite;
+        }
+
+        @keyframes timerWarning {
+            0%, 100% { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+            50% { background: linear-gradient(135deg, #c0392b, #a93226); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .step-title {
+                font-size: 1.8em;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .letter-display {
+                font-size: 3em;
+                padding: 30px 15px;
+            }
+            
+            .timer-number {
+                font-size: 3em;
+            }
+            
+            .word-input {
+                font-size: 1.1em;
+                padding: 15px;
+            }
+            
+            .word-count-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 11 of 15</div>
+            <h1>🗣️ Verbal Fluency</h1>
+            <p>Executive Function & Language Production</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">🗣️</div>
+                Letter Fluency Test
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> Now, I want you to tell me as many words as you can think of that begin with the letter <strong>"B"</strong>. I will tell you to stop after one minute. Proper nouns, numbers, and different forms of a verb are not permitted. Are you ready?
+            </div>
+
+            <div class="progress-indicator" id="progressIndicator">
+                Ready to Begin Verbal Fluency Test
+            </div>
+
+            <div class="letter-display">
+                <div class="letter-text">B</div>
+                <div class="letter-instruction">Name words starting with this letter</div>
+            </div>
+
+            <div class="timer-display" id="timerDisplay" style="display: none;">
+                <div class="timer-number" id="timerNumber">60</div>
+                <div class="timer-label">seconds remaining</div>
+                <div class="timer-progress" id="timerProgress" style="width: 100%;"></div>
+            </div>
+
+            <div class="input-area" id="inputArea">
+                <label class="input-label" for="wordInput">
+                    Enter words beginning with "B" (separate with commas or spaces):
+                </label>
+                <textarea class="word-input" 
+                         id="wordInput" 
+                         placeholder="Example: ball, beautiful, bright, building, butterfly..."
+                         oninput="processWords(this.value)"
+                         disabled></textarea>
+            </div>
+
+            <div class="word-count-display">
+                <div class="count-item">
+                    <div class="count-label">Valid Words</div>
+                    <div class="count-value count-good" id="validCount">0</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-label">Invalid Words</div>
+                    <div class="count-value count-error" id="invalidCount">0</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-label">Duplicates</div>
+                    <div class="count-value count-warning" id="duplicateCount">0</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-label">Final Score</div>
+                    <div class="count-value count-warning" id="finalScore">0/1</div>
+                </div>
+            </div>
+
+            <div class="word-list" id="wordList" style="display: none;">
+                <div class="word-list-title">Your Words:</div>
+                <div class="word-tags" id="wordTags"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-warning" onclick="startFluencyTest()" id="startBtn">
+                    ▶️ Start Timer
+                </button>
+                <button class="btn btn-danger" onclick="stopFluencyTest()" id="stopBtn" style="display: none;">
+                    ⏸️ Stop Timer
+                </button>
+                <button class="btn btn-success" onclick="completeTest()" id="completeBtn" style="display: none;">
+                    ✓ Complete Test
+                </button>
+                <button class="btn btn-secondary" onclick="clearWords()" id="clearBtn">
+                    🗑️ Clear Words
+                </button>
+                <button class="btn btn-secondary" onclick="resetFluencyTest()" id="resetBtn">
+                    🔄 Reset Test
+                </button>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback messages will appear here -->
+            </div>
+
+            <div class="examples-section">
+                <h3 style="margin-bottom: 15px; color: #155724;">✓ Valid Examples:</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <span class="word-tag">ball</span>
+                    <span class="word-tag">beautiful</span>
+                    <span class="word-tag">bright</span>
+                    <span class="word-tag">building</span>
+                    <span class="word-tag">butterfly</span>
+                    <span class="word-tag">basket</span>
+                    <span class="word-tag">bottle</span>
+                    <span class="word-tag">bridge</span>
+                    <span class="word-tag">brother</span>
+                    <span class="word-tag">business</span>
+                    <span class="word-tag">balance</span>
+                </div>
+            </div>
+
+            <div class="rules-section">
+                <h3 style="margin-bottom: 15px; color: #721c24;">✗ Not Permitted:</h3>
+                <ul style="margin-left: 20px; color: #721c24; line-height: 1.6;">
+                    <li><strong>Proper nouns:</strong> Bob, Boston, Brazil, BMW</li>
+                    <li><strong>Numbers:</strong> billion, billion-dollar</li>
+                    <li><strong>Different verb forms:</strong> build, building, built (only one form allowed)</li>
+                    <li><strong>Plurals of same word:</strong> book, books (only one form allowed)</li>
+                </ul>
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 20px; color: #856404;">Scoring Criteria (1 point total):</h3>
+                <ul style="margin: 20px 0; color: #856404; line-height: 1.6;">
+                    <li><strong>1 point if 11 or more valid words are generated</strong></li>
+                    <li><strong>0 points if fewer than 11 valid words</strong></li>
+                    <li>Time limit: exactly 60 seconds</li>
+                    <li>Words must begin with the letter "B" (MoCA Version 8.3)</li>
+                    <li>Invalid words, proper nouns, and duplicates are not counted</li>
+                    <li>This test measures executive function and language production</li>
+                </ul>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="goToNextStep()" id="nextBtn">
+                    Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let testStarted = false;
+        let testActive = false;
+        let testCompleted = false;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let words = [];
+        let validWords = [];
+        let invalidWords = [];
+        let duplicateWords = [];
+
+        // Common invalid words and proper nouns starting with B
+        const invalidWords = [
+            'bob', 'boston', 'brazil', 'bmw', 'biden', 'britain', 'british',
+            'barcelona', 'beijing', 'berlin', 'bangkok', 'budapest', 'brussels',
+            'beethoven', 'batman', 'boeing', 'bluetooth', 'facebook'
+        ];
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFluencyTest();
+        });
+
+        function initializeFluencyTest() {
+            updateScoreDisplay();
+        }
+
+        function startFluencyTest() {
+            testStarted = true;
+            testActive = true;
+            timeLeft = 60;
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-flex';
+            document.getElementById('timerDisplay').style.display = 'block';
+            document.getElementById('inputArea').classList.add('active');
+            document.getElementById('wordInput').disabled = false;
+            document.getElementById('wordList').style.display = 'block';
+            document.getElementById('progressIndicator').textContent = 'Fluency Test Active - Generate words starting with "B"';
+            
+            // Focus input
+            document.getElementById('wordInput').focus();
+            
+            // Start timer
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            showFeedback('Timer started! Enter as many words as possible that begin with "B". Separate words with commas or spaces.', 'info');
+        }
+
+        function updateTimer() {
+            if (!testActive) return;
+            
+            timeLeft--;
+            document.getElementById('timerNumber').textContent = timeLeft;
+            
+            // Update progress bar
+            const progress = (timeLeft / 60) * 100;
+            document.getElementById('timerProgress').style.width = progress + '%';
+            
+            // Warning when time is low
+            if (timeLeft <= 10) {
+                document.getElementById('timerDisplay').classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                stopFluencyTest();
+            }
+        }
+
+        function stopFluencyTest() {
+            testActive = false;
+            clearInterval(timerInterval);
+            
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('completeBtn').style.display = 'inline-flex';
+            document.getElementById('wordInput').disabled = true;
+            document.getElementById('inputArea').classList.remove('active');
+            document.getElementById('progressIndicator').textContent = 'Fluency Test Completed - Analyzing Results';
+            
+            if (timeLeft <= 0) {
+                showFeedback('⏰ Time\'s up! Your fluency test is complete. Results are being analyzed.', 'warning');
+            } else {
+                showFeedback('✋ Test stopped. Your fluency test is complete. Results are being analyzed.', 'info');
+            }
+            
+            analyzeResults();
+        }
+
+        function processWords(input) {
+            if (!testActive && !testCompleted) return;
+            
+            // Split input by commas, spaces, or newlines
+            const rawWords = input.toLowerCase()
+                .replace(/[^\w\s,]/g, '') // Remove punctuation except commas
+                .split(/[\s,\n]+/)
+                .filter(word => word.length > 0);
+            
+            words = [];
+            validWords = [];
+            invalidWords = [];
+            duplicateWords = [];
+            
+            const seenWords = new Set();
+            
+            rawWords.forEach(word => {
+                const trimmedWord = word.trim();
+                if (trimmedWord.length === 0) return;
+                
+                words.push(trimmedWord);
+                
+                // Check if starts with B
+                if (!trimmedWord.startsWith('b')) {
+                    invalidWords.push(trimmedWord);
+                    return;
+                }
+                
+                // Check for duplicates
+                if (seenWords.has(trimmedWord)) {
+                    duplicateWords.push(trimmedWord);
+                    return;
+                }
+                
+                // Check for invalid words (proper nouns, etc.)
+                if (isInvalidWord(trimmedWord)) {
+                    invalidWords.push(trimmedWord);
+                    return;
+                }
+                
+                // Valid word
+                validWords.push(trimmedWord);
+                seenWords.add(trimmedWord);
+            });
+            
+            updateWordDisplay();
+            updateScoreDisplay();
+        }
+
+        function isInvalidWord(word) {
+            // Check against known invalid words
+            if (invalidWords.includes(word.toLowerCase())) {
+                return true;
+            }
+            
+            // Check if it's a proper noun (starts with capital in original input)
+            // This is a simple heuristic
+            if (word.length > 2 && /^[A-Z]/.test(word)) {
+                return true;
+            }
+            
+            // Check for numbers
+            if (/\d/.test(word)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function updateWordDisplay() {
+            const wordTags = document.getElementById('wordTags');
+            wordTags.innerHTML = '';
+            
+            words.forEach(word => {
+                const tag = document.createElement('span');
+                tag.textContent = word;
+                tag.className = 'word-tag';
+                
+                if (invalidWords.includes(word)) {
+                    tag.classList.add('invalid');
+                    tag.title = 'Invalid word (proper noun, number, or doesn\'t start with B)';
+                } else if (duplicateWords.includes(word)) {
+                    tag.classList.add('duplicate');
+                    tag.title = 'Duplicate word';
+                }
+                
+                wordTags.appendChild(tag);
+            });
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('validCount').textContent = validWords.length;
+            document.getElementById('invalidCount').textContent = invalidWords.length;
+            document.getElementById('duplicateCount').textContent = duplicateWords.length;
+            
+            const score = validWords.length >= 11 ? 1 : 0;
+            document.getElementById('finalScore').textContent = `${score}/1`;
+            
+            // Update color coding
+            const validElement = document.getElementById('validCount');
+            const scoreElement = document.getElementById('finalScore');
+            
+            if (validWords.length >= 11) {
+                validElement.className = 'count-value count-excellent';
+                scoreElement.className = 'count-value count-excellent';
+            } else if (validWords.length >= 8) {
+                validElement.className = 'count-value count-good';
+                scoreElement.className = 'count-value count-warning';
+            } else if (validWords.length >= 5) {
+                validElement.className = 'count-value count-warning';
+                scoreElement.className = 'count-value count-warning';
+            } else {
+                validElement.className = 'count-value count-error';
+                scoreElement.className = 'count-value count-error';
+            }
+        }
+
+        function analyzeResults() {
+            const validCount = validWords.length;
+            const score = validCount >= 11 ? 1 : 0;
+            
+            let message = '';
+            let type = '';
+            
+            if (score === 1) {
+                message = `🎉 Excellent! You generated ${validCount} valid words beginning with "B". This demonstrates strong verbal fluency and executive function.`;
+                type = 'success';
+            } else if (validCount >= 8) {

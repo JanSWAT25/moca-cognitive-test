@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 12 - Abstraction Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .example-section {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+
+        .example-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .example-pair {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .example-pair::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: exampleShimmer 4s infinite;
+        }
+
+        @keyframes exampleShimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .example-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .example-response {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.1em;
+            border-left: 4px solid #28a745;
+        }
+
+        .test-pair-container {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-pair-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .test-pair-container.active {
+            border-color: #3498db;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .test-pair-container.active::before {
+            left: 100%;
+        }
+
+        .test-pair-container.completed {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .test-pair-container.incorrect {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            animation: errorShake 0.5s ease-in-out;
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .pair-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .pair-number {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .pair-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .word-pair-display {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-pair-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pairShimmer 4s infinite;
+        }
+
+        @keyframes pairShimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pair-items {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 15px;
+            font-size: 2em;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pair-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .pair-item:hover {
+            transform: scale(1.05);
+        }
+
+        .vs-divider {
+            font-size: 0.8em;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .pair-question {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-section {
+            margin: 25px 0;
+        }
+
+        .input-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .category-input {
+            width: 100%;
+            padding: 20px;
+            border: 3px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .category-input:focus {
+            outline: none;
+            border-color: #9b59b6;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .category-input.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .category-input.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .category-input.partial {
+            border-color: #ffc107;
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .input-feedback {
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            min-height: 25px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .feedback-correct {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .feedback-incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .feedback-partial {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .feedback-pending {
+            background: #e9ecef;
+            color: #6c757d;
+            border-left: 4px solid #adb5bd;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .scoring-dashboard {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .dashboard-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .score-item:hover::before {
+            left: 100%;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-excellent { color: #28a745; }
+        .score-good { color: #17a2b8; }
+        .score-warning { color: #ffc107; }
+        .score-error { color: #dc3545; }
+
+        .progress-indicator {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .feedback-area {
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .feedback-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .acceptable-answers {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .unacceptable-answers {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .answer-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .answer-tag {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .answer-correct {
+            background: #28a745;
+            color: white;
+        }
+
+        .answer-incorrect {
+            background: #dc3545;
+            color: white;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .step-title {
+                font-size: 1.8em;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .pair-items {
+                flex-direction: column;
+                gap: 15px;
+                font-size: 1.5em;
+            }
+            
+            .vs-divider {
+                transform: rotate(90deg);
+            }
+            
+            .category-input {
+                font-size: 1.1em;
+                padding: 15px;
+            }
+            
+            .answer-examples {
+                flex-direction: column;
+            }
+            
+            .score-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 12 of 15</div>
+            <h1>🤔 Abstraction Test</h1>
+            <p>Abstract Thinking & Conceptual Reasoning</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">🤔</div>
+                Category Similarity Task
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> I will give you two words and I would like you to tell me what category they belong to. Think about what these items have in common - what type of things are they? Look for the broader category that connects them.
+            </div>
+
+            <div class="progress-indicator" id="progressIndicator">
+                Ready to Begin Abstraction Test
+            </div>
+
+            <!-- Example Section -->
+            <div class="example-section">
+                <div class="example-title">Practice Example</div>
+                
+                <div class="example-pair">
+                    <div class="example-text">🍊 Orange and 🍌 Banana</div>
+                </div>
+                
+                <div class="example-response">
+                    <strong>Correct Answer:</strong> "Fruits" or "Food" - Both items are part of the category of fruits/food.
+                </div>
+                
+                <p style="margin-top: 15px; color: #6c757d; font-style: italic;">
+                    This example shows how to identify the broader category that connects two items.
+                </p>
+            </div>
+
+            <!-- Test Pair 1: Hammer - Screwdriver -->
+            <div class="test-pair-container active" id="pair1Container">
+                <div class="pair-header">
+                    <div class="pair-number">1</div>
+                    <div class="pair-title">First Word Pair</div>
+                </div>
+                
+                <div class="word-pair-display">
+                    <div class="pair-items">
+                        <div class="pair-item">🔨 Hammer</div>
+                        <div class="vs-divider">and</div>
+                        <div class="pair-item">🪚 Screwdriver</div>
+                    </div>
+                    <div class="pair-question">What category do these belong to?</div>
+                </div>
+                
+                <div class="input-section">
+                    <label class="input-label" for="input1">What do hammer and screwdriver have in common?</label>
+                    <input type="text" 
+                           class="category-input" 
+                           id="input1" 
+                           placeholder="Enter the category they belong to..."
+                           onchange="checkAnswer(1, this.value)"
+                           onkeypress="handleEnterKey(event, 1)">
+                    <div class="input-feedback feedback-pending" id="feedback1">
+                        Think about what type of things these are
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Pair 2: Matches - Lamp -->
+            <div class="test-pair-container" id="pair2Container" style="display: none;">
+                <div class="pair-header">
+                    <div class="pair-number">2</div>
+                    <div class="pair-title">Second Word Pair</div>
+                </div>
+                
+                <div class="word-pair-display">
+                    <div class="pair-items">
+                        <div class="pair-item">🔥 Matches</div>
+                        <div class="vs-divider">and</div>
+                        <div class="pair-item">💡 Lamp</div>
+                    </div>
+                    <div class="pair-question">What category do these belong to?</div>
+                </div>
+                
+                <div class="input-section">
+                    <label class="input-label" for="input2">What do matches and lamp have in common?</label>
+                    <input type="text" 
+                           class="category-input" 
+                           id="input2" 
+                           placeholder="Enter the category they belong to..."
+                           onchange="checkAnswer(2, this.value)"
+                           onkeypress="handleEnterKey(event, 2)">
+                    <div class="input-feedback feedback-pending" id="feedback2">
+                        Complete the first pair to unlock this question
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-warning" onclick="startAbstractionTest()" id="startBtn">
+                    ▶️ Start Test
+                </button>
+                <button class="btn btn-primary" onclick="proceedToPair2()" id="nextPairBtn" style="display: none;">
+                    ➡️ Next Pair
+                </button>
+                <button class="btn btn-secondary" onclick="showHints()" id="hintsBtn" style="display: none;">
+                    💡 Show Hints
+                </button>
+                <button class="btn btn-success" onclick="completeTest()" id="completeBtn" style="display: none;">
+                    ✓ Complete Test
+                </button>
+                <button class="btn btn-secondary" onclick="resetAbstractionTest()" id="resetBtn">
+                    🔄 Reset Test
+                </button>
+            </div>
+
+            <div class="scoring-dashboard">
+                <div class="dashboard-title">Abstraction Performance</div>
+                <div class="score-grid">
+                    <div class="score-item">
+                        <div class="score-label">Pair 1 Score</div>
+                        <div class="score-value score-warning" id="pair1Score">0/1</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Pair 2 Score</div>
+                        <div class="score-value score-warning" id="pair2Score">0/1</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Abstract Thinking</div>
+                        <div class="score-value score-good" id="abstractThinking">Pending</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Total Score</div>
+                        <div class="score-value score-warning" id="totalScore">0/2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback messages will appear here -->
+            </div>
+
+            <div class="acceptable-answers">
+                <h3 style="margin-bottom: 15px; color: #155724;">✓ Acceptable Answers:</h3>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Hammer - Screwdriver:</strong>
+                    <div class="answer-examples">
+                        <span class="answer-tag answer-correct">tools</span>
+                        <span class="answer-tag answer-correct">work tools</span>
+                        <span class="answer-tag answer-correct">hand tools</span>
+                        <span class="answer-tag answer-correct">construction tools</span>
+                        <span class="answer-tag answer-correct">implements</span>
+                    </div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Matches - Lamp:</strong>
+                    <div class="answer-examples">
+                        <span class="answer-tag answer-correct">light sources</span>
+                        <span class="answer-tag answer-correct">sources of light</span>
+                        <span class="answer-tag answer-correct">illumination</span>
+                        <span class="answer-tag answer-correct">lighting</span>
+                        <span class="answer-tag answer-correct">things that give light</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="unacceptable-answers">
+                <h3 style="margin-bottom: 15px; color: #721c24;">✗ Unacceptable Answers:</h3>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Hammer - Screwdriver:</strong>
+                    <div class="answer-examples">
+                        <span class="answer-tag answer-incorrect">made of metal</span>
+                        <span class="answer-tag answer-incorrect">have handles</span>
+                        <span class="answer-tag answer-incorrect">hardware</span>
+                        <span class="answer-tag answer-incorrect">objects</span>
+                    </div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Matches - Lamp:</strong>
+                    <div class="answer-examples">
+                        <span class="answer-tag answer-incorrect">household items</span>
+                        <span class="answer-tag answer-incorrect">objects</span>
+                        <span class="answer-tag answer-incorrect">things</span>
+                        <span class="answer-tag answer-incorrect">useful</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 20px; color: #856404;">Scoring Criteria (2 points total):</h3>
+                <ul style="margin: 20px 0; color: #856404; line-height: 1.6;">
+                    <li><strong>1 point per pair correctly answered</strong></li>
+                    <li>Only the last two pairs are scored (not the practice example)</li>
+                    <li>Responses must demonstrate abstract thinking, not concrete descriptions</li>
+                    <li><strong>Pair 1 (Hammer - Screwdriver):</strong> tools, work tools, hand tools, implements</li>
+                    <li><strong>Pair 2 (Matches - Lamp):</strong> light sources, sources of light, illumination, lighting</li>
+                    <li>Concrete answers like "made of metal" or "household items" are not acceptable</li>
+                    <li>This test assesses abstract thinking and conceptual reasoning abilities</li>
+                </ul>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="go

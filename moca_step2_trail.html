@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 2 - Trail Making Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1200px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .trail-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+            position: relative;
+        }
+
+        .trail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .trail-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .legend-numbers {
+            background: #3498db;
+            color: white;
+        }
+
+        .legend-letters {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .trail-template {
+            position: relative;
+            height: 400px;
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .trail-point {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #2c3e50;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .trail-point.number {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #2980b9;
+            color: white;
+        }
+
+        .trail-point.letter {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #c0392b;
+            color: white;
+        }
+
+        .trail-point.current {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
+            animation: pulse 1.5s infinite;
+        }
+
+        .trail-point.completed {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-color: #27ae60;
+            color: white;
+            transform: scale(0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(52, 152, 219, 0.9); }
+        }
+
+        .drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            z-index: 5;
+        }
+
+        .hint-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 3;
+        }
+
+        .hint-overlay.visible {
+            opacity: 1;
+        }
+
+        .status-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .status-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-progress { color: #3498db; }
+        .status-success { color: #2ecc71; }
+        .status-error { color: #e74c3c; }
+        .status-warning { color: #f39c12; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback-area {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .feedback-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .criteria-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .criteria-list li {
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .criteria-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .sequence-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            letter-spacing: 8px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .step-title {
+                font-size: 1.8em;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .trail-template {
+                height: 300px;
+            }
+            
+            .trail-point {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+            
+            .status-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+        }
+
+        .timer-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 2 of 15</div>
+            <h1>🔀 Alternating Trail Making</h1>
+            <p>Executive Function Assessment</p>
+        </div>
+
+        <div class="timer-display" id="timer">
+            ⏱️ Time: <span id="timeDisplay">00:00</span>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">🔀</div>
+                Trail Making Test
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> Please draw a line going from a number to a letter in ascending order. Begin here [point to 1] and draw a line from 1 then to A then to 2 and so on. End here [point to E]. Do not lift your pen while drawing.
+            </div>
+
+            <div class="sequence-display">
+                Target Sequence: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E
+            </div>
+
+            <div class="trail-container">
+                <div class="trail-header">
+                    <div class="trail-title">Trail Making Template</div>
+                    <div class="legend">
+                        <div class="legend-item legend-numbers">● Numbers</div>
+                        <div class="legend-item legend-letters">● Letters</div>
+                    </div>
+                </div>
+                
+                <div class="trail-template" id="trailTemplate">
+                    <!-- Trail points positioned according to MoCA layout -->
+                    <div class="trail-point number" id="point-1" data-value="1" data-index="0" style="top: 50px; left: 80px;">1</div>
+                    <div class="trail-point letter" id="point-A" data-value="A" data-index="1" style="top: 80px; left: 250px;">A</div>
+                    <div class="trail-point number" id="point-2" data-value="2" data-index="2" style="top: 150px; left: 180px;">2</div>
+                    <div class="trail-point letter" id="point-B" data-value="B" data-index="3" style="top: 220px; left: 350px;">B</div>
+                    <div class="trail-point number" id="point-3" data-value="3" data-index="4" style="top: 280px; left: 200px;">3</div>
+                    <div class="trail-point letter" id="point-C" data-value="C" data-index="5" style="top: 180px; left: 450px;">C</div>
+                    <div class="trail-point number" id="point-4" data-value="4" data-index="6" style="top: 100px; left: 400px;">4</div>
+                    <div class="trail-point letter" id="point-D" data-value="D" data-index="7" style="top: 320px; left: 120px;">D</div>
+                    <div class="trail-point number" id="point-5" data-value="5" data-index="8" style="top: 350px; left: 300px;">5</div>
+                    <div class="trail-point letter" id="point-E" data-value="E" data-index="9" style="top: 250px; left: 500px;">E</div>
+                    
+                    <!-- Drawing canvas -->
+                    <canvas id="trailCanvas" class="drawing-canvas" width="600" height="400"></canvas>
+                    
+                    <!-- Hint overlay -->
+                    <svg class="hint-overlay" id="hintOverlay" width="600" height="400">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#2ecc71" />
+                            </marker>
+                        </defs>
+                        <!-- Hint path will be drawn here -->
+                    </svg>
+                </div>
+            </div>
+
+            <div class="status-dashboard">
+                <div class="status-card">
+                    <div class="status-label">Current Target</div>
+                    <div class="status-value status-progress" id="currentTarget">Start at 1</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Progress</div>
+                    <div class="status-value status-success" id="progressCount">0/10</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Errors</div>
+                    <div class="status-value status-error" id="errorCount">0</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Time Elapsed</div>
+                    <div class="status-value status-warning" id="elapsedTime">00:00</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="clearTrail()">
+                    🗑️ Clear Drawing
+                </button>
+                <button class="btn btn-warning" onclick="toggleHint()" id="hintBtn">
+                    💡 Show Hint
+                </button>
+                <button class="btn btn-secondary" onclick="resetTest()">
+                    🔄 Reset Test
+                </button>
+                <button class="btn btn-success" onclick="validatePath()" id="validateBtn" disabled>
+                    ✓ Validate Path
+                </button>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback messages will appear here -->
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 15px; color: #856404;">Scoring Criteria (1 point total):</h3>
+                <ul class="criteria-list">
+                    <li>Successfully draw the pattern: 1-A-2-B-3-C-4-D-5-E</li>
+                    <li>Lines must not cross each other</li>
+                    <li>Must be completed without lifting the pen</li>
+                    <li>Any error not immediately self-corrected earns a score of 0</li>
+                    <li>Do not connect the end (E) to the beginning (1)</li>
+                </ul>
+                <p style="margin-top: 15px; font-style: italic; color: #856404;">
+                    <strong>Note:</strong> The task assesses executive function, visual attention, and task switching abilities.
+                </p>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="goToNextStep()" id="nextBtn">
+                    Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentTargetIndex = 0;
+        let pathPoints = [];
+        let drawnPath = [];
+        let testStartTime = null;
+        let timerInterval = null;
+        let errors = 0;
+        let isTestComplete = false;
+        
+        const trailSequence = [
+            {value: '1', type: 'number', id: 'point-1'},
+            {value: 'A', type: 'letter', id: 'point-A'},
+            {value: '2', type: 'number', id: 'point-2'},
+            {value: 'B', type: 'letter', id: 'point-B'},
+            {value: '3', type: 'number', id: 'point-3'},
+            {value: 'C', type: 'letter', id: 'point-C'},
+            {value: '4', type: 'number', id: 'point-4'},
+            {value: 'D', type: 'letter', id: 'point-D'},
+            {value: '5', type: 'number', id: 'point-5'},
+            {value: 'E', type: 'letter', id: 'point-E'}
+        ];
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTrailTest();
+            startTimer();
+        });
+
+        function initializeTrailTest() {
+            canvas = document.getElementById('trailCanvas');
+            ctx = canvas.getContext('2d');
+            
+            setupDrawingEvents();
+            updateCurrentTarget();
+            generateHintPath();
+        }
+
+        function setupDrawingEvents() {
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            if (isTestComplete) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if starting from the correct point
+            if (currentTargetIndex === 0) {
+                const startPoint = getPointPosition(trailSequence[0].id);
+                const distance = Math.sqrt(Math.pow(x - startPoint.x, 2) + Math.pow(y - startPoint.y, 2));
+                
+                if (distance > 30) {
+                    showFeedback('Please start drawing from point 1', 'error');
+                    incrementErrors();
+                    return;
+                }
+                
+                if (!testStartTime) {
+                    testStartTime = Date.now();
+                }
+            }
+            
+            isDrawing = true;
+            pathPoints = [{x, y}];
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#3498db';
+        }
+
+        function draw(e) {
+            if (!isDrawing || isTestComplete) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            pathPoints.push({x, y});
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            
+            // Check if we've reached the next target
+            checkTargetReached(x, y);
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.beginPath();
+                
+                if (pathPoints.length > 0) {
+                    drawnPath.push([...pathPoints]);
+                    pathPoints = [];
+                }
+                
+                document.getElementById('validateBtn').disabled = false;
+            }
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function checkTargetReached(x, y) {
+            if (currentTargetIndex >= trailSequence.length) return;
+            
+            const targetPoint = getPointPosition(trailSequence[currentTargetIndex].id);
+            const distance = Math.sqrt(Math.pow(x - targetPoint.x, 2) + Math.pow(y - targetPoint.y, 2));
+            
+            if (distance < 25) {
+                markPointCompleted(trailSequence[currentTargetIndex].id);
+                currentTargetIndex++;
+                updateCurrentTarget();
+                updateProgress();
+                
+                if (currentTargetIndex >= trailSequence.length) {
+                    completeTest();
+                }
+            }
+        }
+
+        function getPointPosition(pointId) {
+            const element = document.getElementById(pointId);
+            const rect = element.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            return {
+                x: rect.left - canvasRect.left + rect.width / 2,
+                y: rect.top - canvasRect.top + rect.height / 2
+            };
+        }
+
+        function markPointCompleted(pointId) {
+            const point = document.getElementById(pointId);
+            point.classList.remove('current');
+            point.classList.add('completed');
+        }
+
+        function updateCurrentTarget() {
+            // Remove current class from all points
+            document.querySelectorAll('.trail-point').forEach(point => {
+                point.classList.remove('current');
+            });
+            
+            if (currentTargetIndex < trailSequence.length) {
+                const targetElement = document.getElementById(trailSequence[currentTargetIndex].id);
+                targetElement.classList.add('current');
+                
+                document.getElementById('currentTarget').textContent = 
+                    `Go to: ${trailSequence[currentTargetIndex].value}`;
+            } else {
+                document.getElementById('currentTarget').textContent = 'Complete!';
+                document.getElementById('currentTarget').className = 'status-value status-success';
+            }
+        }
+
+        function updateProgress() {
+            document.getElementById('progressCount').textContent = `${currentTargetIndex}/10`;
+        }
+
+        function incrementErrors() {
+            errors++;
+            document.getElementById('errorCount').textContent = errors;
+        }
+
+        function startTimer() {
+            const startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timeDisplay').textContent = timeString;
+                document.getElementById('elapsedTime').textContent = timeString;
+            }, 1000);
+        }
+
+        function generateHintPath() {
+            const svg = document.getElementById('hintOverlay');
+            let pathData = '';
+            
+            for (let i = 0; i < trailSequence.length - 1; i++) {
+                const start = getPointPosition(trailSequence[i].id);
+                const end = getPointPosition(trailSequence[i + 1].id);
+                
+                if (i === 0) {
+                    pathData += `M ${start.x} ${start.y} `;
+                }
+                pathData += `L ${end.x} ${end.y} `;
+            }
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#2ecc71');
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('stroke-dasharray', '8,4');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('marker-end', 'url(#arrowhead)');
+            path.setAttribute('opacity', '0.8');
+            
+            svg.appendChild(path);
+        }
+
+        function toggleHint() {
+            const hintOverlay = document.getElementById('hintOverlay');
+            const hintBtn = document.getElementById('hintBtn');
+            
+            if (hintOverlay.classList.contains('visible')) {
+                hintOverlay.classList.remove('visible');
+                hintBtn.innerHTML = '💡 Show Hint';
+            } else {
+                hintOverlay.classList.add('visible');
+                hintBtn.innerHTML = '👁️ Hide Hint';
+                
+                setTimeout(() => {
+                    hintOverlay.classList.remove('visible');
+                    hintBtn.innerHTML = '💡 Show Hint';
+                }, 3000);
+            }
+        }

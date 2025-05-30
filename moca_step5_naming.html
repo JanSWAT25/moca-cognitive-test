@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoCA Step 5 - Animal Naming Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-icon {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4f8, #d6eef7);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .animal-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 3px solid #dee2e6;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animal-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #3498db, #2ecc71, #e74c3c, #f39c12);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .animal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .animal-card:hover::before {
+            opacity: 1;
+        }
+
+        .animal-card.answered {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .animal-card.correct {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            animation: correctPulse 2s ease-in-out;
+        }
+
+        .animal-card.incorrect {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            animation: incorrectShake 0.5s ease-in-out;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .animal-illustration {
+            width: 100%;
+            height: 150px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            border: 2px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animal-illustration::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .animal-card:hover .animal-illustration::after {
+            left: 100%;
+        }
+
+        .animal-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .animal-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .animal-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 1.1em;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .animal-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .animal-input.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .animal-input.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .status-correct {
+            background: #28a745;
+            color: white;
+            display: flex;
+        }
+
+        .status-incorrect {
+            background: #dc3545;
+            color: white;
+            display: flex;
+        }
+
+        .scoring-dashboard {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .dashboard-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .score-correct { color: #28a745; }
+        .score-incorrect { color: #dc3545; }
+        .score-pending { color: #ffc107; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback-area {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .feedback-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .feedback-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .correct-answers {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .answers-title {
+            font-weight: 600;
+            color: #155724;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .answer-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #c3e6cb;
+        }
+
+        .answer-animal {
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 5px;
+        }
+
+        .answer-options {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .scoring-criteria {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .criteria-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .criteria-list li {
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .criteria-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        /* Animations */
+        .bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .step-title {
+                font-size: 1.8em;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .animals-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .animal-illustration {
+                height: 120px;
+                font-size: 3em;
+            }
+            
+            .score-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="step-badge">Step 5 of 15</div>
+            <h1>🐎 Animal Naming Test</h1>
+            <p>Language & Semantic Memory Assessment</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <div class="step-icon">🐎</div>
+                Animal Identification
+            </div>
+            
+            <div class="instructions">
+                <strong>Instructions:</strong> Beginning on the left, look at each figure and tell me the name of this animal. Please identify each animal as accurately as possible. Type your answer in the text box below each animal.
+            </div>
+
+            <div class="animals-grid">
+                <!-- Animal 1: Horse -->
+                <div class="animal-card" id="animal1">
+                    <div class="animal-number">1</div>
+                    <div class="status-indicator" id="status1"></div>
+                    <div class="animal-illustration">
+                        <span>🐎</span>
+                    </div>
+                    <div class="animal-label">Animal 1</div>
+                    <input type="text" 
+                           class="animal-input" 
+                           id="input1" 
+                           placeholder="Name this animal"
+                           onchange="checkAnswer(1, this.value)"
+                           autocomplete="off">
+                </div>
+
+                <!-- Animal 2: Tiger -->
+                <div class="animal-card" id="animal2">
+                    <div class="animal-number">2</div>
+                    <div class="status-indicator" id="status2"></div>
+                    <div class="animal-illustration">
+                        <span>🐯</span>
+                    </div>
+                    <div class="animal-label">Animal 2</div>
+                    <input type="text" 
+                           class="animal-input" 
+                           id="input2" 
+                           placeholder="Name this animal"
+                           onchange="checkAnswer(2, this.value)"
+                           autocomplete="off">
+                </div>
+
+                <!-- Animal 3: Duck -->
+                <div class="animal-card" id="animal3">
+                    <div class="status-indicator" id="status3"></div>
+                    <div class="animal-number">3</div>
+                    <div class="animal-illustration">
+                        <span>🦆</span>
+                    </div>
+                    <div class="animal-label">Animal 3</div>
+                    <input type="text" 
+                           class="animal-input" 
+                           id="input3" 
+                           placeholder="Name this animal"
+                           onchange="checkAnswer(3, this.value)"
+                           autocomplete="off">
+                </div>
+            </div>
+
+            <div class="scoring-dashboard">
+                <div class="dashboard-title">Naming Performance</div>
+                <div class="score-grid">
+                    <div class="score-item">
+                        <div class="score-label">Correct Answers</div>
+                        <div class="score-value score-correct" id="correctCount">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Incorrect Answers</div>
+                        <div class="score-value score-incorrect" id="incorrectCount">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Total Score</div>
+                        <div class="score-value score-pending" id="totalScore">0/3</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Completion</div>
+                        <div class="score-value score-pending" id="completionRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="clearAllAnswers()">
+                    🗑️ Clear All
+                </button>
+                <button class="btn btn-warning" onclick="showHints()" id="hintsBtn">
+                    💡 Show Hints
+                </button>
+                <button class="btn btn-success" onclick="checkAllAnswers()" id="checkBtn">
+                    ✓ Check Answers
+                </button>
+                <button class="btn btn-primary" onclick="reviewAnswers()" id="reviewBtn" style="display: none;">
+                    📋 Review Answers
+                </button>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea">
+                <!-- Feedback messages will appear here -->
+            </div>
+
+            <div class="correct-answers" id="correctAnswersPanel" style="display: none;">
+                <div class="answers-title">Accepted Answers for Each Animal:</div>
+                <div class="answers-grid">
+                    <div class="answer-item">
+                        <div class="answer-animal">Animal 1: Horse</div>
+                        <div class="answer-options">horse, stallion, mare, pony</div>
+                    </div>
+                    <div class="answer-item">
+                        <div class="answer-animal">Animal 2: Tiger</div>
+                        <div class="answer-options">tiger, tigress</div>
+                    </div>
+                    <div class="answer-item">
+                        <div class="answer-animal">Animal 3: Duck</div>
+                        <div class="answer-options">duck, mallard, waterfowl</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scoring-criteria">
+                <h3 style="margin-bottom: 15px; color: #856404;">Scoring Criteria (3 points total):</h3>
+                <ul class="criteria-list">
+                    <li>One point is given for each correctly named animal</li>
+                    <li>Animal 1: Horse (also accepts: stallion, mare, pony)</li>
+                    <li>Animal 2: Tiger (also accepts: tigress)</li>
+                    <li>Animal 3: Duck (also accepts: mallard, waterfowl)</li>
+                    <li>Responses must be reasonably close to the correct name</li>
+                    <li>This test assesses semantic memory and word retrieval</li>
+                </ul>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToPreviousStep()">
+                    ← Previous Step
+                </button>
+                <button class="btn btn-primary" onclick="goToNextStep()" id="nextBtn">
+                    Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let answers = {
+            1: { value: '', correct: false },
+            2: { value: '', correct: false },
+            3: { value: '', correct: false }
+        };
+
+        let correctAnswers = {
+            1: ['horse', 'stallion', 'mare', 'pony', 'horses'],
+            2: ['tiger', 'tigress', 'tigers'],
+            3: ['duck', 'mallard', 'waterfowl', 'ducks']
+        };
+
+        let testCompleted = false;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNamingTest();
+        });
+
+        function initializeNamingTest() {
+            // Add enter key listeners to inputs
+            for (let i = 1; i <= 3; i++) {
+                const input = document.getElementById(`input${i}`);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkAnswer(i, this.value);
+                        // Focus next input if available
+                        if (i < 3) {
+                            document.getElementById(`input${i + 1}`).focus();
+                        }
+                    }
+                });
+            }
+            
+            updateScoreDisplay();
+        }
+
+        function checkAnswer(animalNumber, value) {
+            const trimmedValue = value.trim().toLowerCase();
+            const isCorrect = correctAnswers[animalNumber].includes(trimmedValue);
+            
+            answers[animalNumber] = {
+                value: trimmedValue,
+                correct: isCorrect
+            };
+
+            updateAnimalDisplay(animalNumber, isCorrect);
+            updateScoreDisplay();
+            
+            // Check if all animals are answered
+            if (Object.values(answers).every(answer => answer.value !== '')) {
+                document.getElementById('checkBtn').style.display = 'none';
+                document.getElementById('reviewBtn').style.display = 'inline-flex';
+                
+                if (!testCompleted) {
+                    setTimeout(() => {
+                        showResults();
+                    }, 500);
+                }
+            }
+        }
+
+        function updateAnimalDisplay(animalNumber, isCorrect) {
+            const card = document.getElementById(`animal${animalNumber}`);
+            const input = document.getElementById(`input${animalNumber}`);
+            const status = document.getElementById(`status${animalNumber}`);
+
+            // Remove previous classes
+            card.classList.remove('correct', 'incorrect', 'answered');
+            input.classList.remove('correct', 'incorrect');
+
+            // Add new classes
+            card.classList.add('answered');
+            if (isCorrect) {
+                card.classList.add('correct');
+                input.classList.add('correct');
+                status.classList.add('status-correct');
+                status.textContent = '✓';
+            } else {
+                card.classList.add('incorrect');
+                input.classList.add('incorrect');
+                status.classList.add('status-incorrect');
+                status.textContent = '✗';
+            }
+        }
+
+        function updateScoreDisplay() {
+            const correctCount = Object.values(answers).filter(answer => answer.correct).length;
+            const totalAnswered = Object.values(answers).filter(answer => answer.value !== '').length;
+            const incorrectCount = totalAnswered - correctCount;
+            const completionRate = Math.round((totalAnswered / 3) * 100);
+
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('incorrectCount').textContent = incorrectCount;
+            document.getElementById('totalScore').textContent = `${correctCount}/3`;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+
+            // Update score colors
+            const totalScoreElement = document.getElementById('totalScore');
+            totalScoreElement.className = 'score-value ' + 
+                (correctCount === 3 ? 'score-correct' : 
+                 correctCount > 0 ? 'score-pending' : 'score-incorrect');
+        }
+
+        function clearAllAnswers() {
+            for (let i = 1; i <= 3; i++) {
+                const input = document.getElementById(`input${i}`);
+                const card = document.getElementById(`animal${i}`);
+                const status = document.getElementById(`status${i}`);
+
+                input.value = '';
+                input.className = 'animal-input';
+                card.className = 'animal-card';
+                status.className = 'status-indicator';
+                status.textContent = '';
+
+                answers[i] = { value: '', correct: false };
+            }
+
+            updateScoreDisplay();
+            hideFeedback();
+            hideCorrectAnswers();
+            testCompleted = false;
+            
+            document.getElementById('checkBtn').style.display = 'inline-flex';
+            document.getElementById('reviewBtn').style.display = 'none';
+        }
+
+        function showHints() {
+            const hintsBtn = document.getElementById('hintsBtn');
+            const correctAnswersPanel = document.getElementById('correctAnswersPanel');
+            
+            if (correctAnswersPanel.style.display === 'none') {
+                correctAnswersPanel.style.display = 'block';
+                correctAnswersPanel.classList.add('fade-in');
+                hintsBtn.innerHTML = '👁️ Hide Hints';
+                
+                showFeedback('💡 Hint panel displayed. These are the accepted answers for each animal.', 'info');
+            } else {
+                hideCorrectAnswers();
+                hintsBtn.innerHTML = '💡 Show Hints';
+            }
+        }
+
+        function checkAllAnswers() {
+            let allAnswered = true;
+            
+            for (let i = 1; i <= 3; i++) {
+                const input = document.getElementById(`input${i}`);
+                if (!input.value.trim()) {
+                    allAnswered = false;
+                    input.focus();
+                    break;
+                }
+            }
+            
+            if (!allAnswered) {
+                showFeedback('Please name all three animals before checking answers.', 'warning');
+                return;
+            }
+            
+            showResults();
+        }
+
+        function showResults() {
+            testCompleted = true;
+            const correctCount = Object.values(answers).filter(answer => answer.correct).length;
+            
+            let message = '';
+            let type = '';
+            
+            if (correctCount === 3) {
+                message = '🎉 Perfect! You correctly identified all three animals. Excellent semantic memory and word retrieval skills!';
+                type = 'success';
+            } else if (correctCount === 2) {
+                message = '👍 Good work! You correctly identified 2 out of 3 animals. This shows strong naming ability with minor difficulty.';
+                type = 'warning';
+            } else if (correctCount === 1) {
+                message = '⚠️ You correctly identified 1 out of 3 animals. Consider reviewing visual recognition and naming skills.';
+                type = 'warning';
+            } else {
+                message = '❌ No animals were correctly identified. This may indicate difficulty with semantic memory or word retrieval.';
+                type = 'error';
+            }
+            
+            showFeedback(message, type);
+            showCorrectAnswers();
+        }
+
+        function reviewAnswers() {
+            showCorrectAnswers();
+            
+            // Highlight differences
+            for (let i = 1; i <= 3; i++) {
+                const input = document.getElementById(`input${i}`);
+                if (!answers[i].correct && answers[i].value) {
+                    const correctOptions
