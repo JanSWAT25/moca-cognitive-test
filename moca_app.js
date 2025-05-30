@@ -254,7 +254,10 @@ class MoCATest {
         }
 
         function setupDrawingEvents() {
-            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousedown', function(e) {
+                console.log('mousedown on canvas', e);
+                startDrawing(e);
+            });
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
